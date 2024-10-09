@@ -1,0 +1,39 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    list-style-type: none;
+    text-decoration: none;
+}
+
+html {
+    scroll-behavior: smooth;
+    font-size: 62.5%;
+    font-family: sans-serif;
+}
+
+body {
+    /* background-color: #FEFFD2; */
+}
+
+.hero {
+    padding: 5rem;
+}
+
+.hero h1 {
+    font-size: 32px;
+}
+
+.hero p {
+    font-size: 16px;
+    margin: 2rem 0;
+}
+
+.hero a {
+    display: inline-block;
+    color: black;
+    padding: 1rem;
+    border: solid 2px gold;
+    border-radius: 0.5rem;
+    margin-right: 1rem;
+}
