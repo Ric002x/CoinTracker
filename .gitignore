@@ -13,3 +13,5 @@ docs/_build/
 # Pernosal Addition
 
 chat.md
+client_secret.json
+mydatabase.db
