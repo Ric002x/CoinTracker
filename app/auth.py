@@ -7,7 +7,7 @@ import requests
 from flask import Blueprint, abort, redirect, request, session
 from google.oauth2 import id_token
 from google_auth_oauthlib.flow import Flow
-from models import User, session_db
+from models import OAuth, User, session_db
 from pip._vendor import cachecontrol
 
 GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_OAUTH_CLIENT_ID")
@@ -26,6 +26,14 @@ auth_pb = Blueprint('auth', __name__)
 
 
 def login_is_required(function):
+    def wrapper(*args, **kwargs):
+        if 'google_id' not in session:
+            return abort(401)
+        return function()
+    return wrapper
+
+
+def token_is_required(function):
     @wraps(function)
     def wrapper(*args, **kwargs):
         access_token = request.headers.get(
@@ -39,6 +47,13 @@ def login_is_required(function):
         if not token_info:
             # Se o token não for válido, aborta com 401
             return abort(401)
+
+        oauth = session_db.query(OAuth).filter_by(
+            access_token=access_token.replace('Bearer ', '')).first()
+        user = session_db.query(User).filter_by(
+            id=oauth.user_id).first()  # type: ignore
+
+        session['user'] = user.id  # type: ignore
 
         return function(*args, **kwargs)
 
@@ -57,6 +72,10 @@ def verify_access_token(access_token):
 
 @auth_pb.route('/login')
 def login():
+    if 'google_id' in session:
+        return redirect('/protected_area')
+    if request.headers.get('Authorization'):
+        return redirect('/protected_area')
     authorization_url, state = flow.authorization_url(prompt='consent')
     session['state'] = state
     return redirect(authorization_url)
@@ -94,6 +113,20 @@ def callback():
 
     session['google_id'] = id_info.get('sub')
     session['name'] = id_info.get('name')
+
+    user = session_db.query(User).filter_by(google_id=id_info['sub']).first()
+    oauth = session_db.query(OAuth).filter_by(
+        user_id=user.id).first()  # type: ignore
+    if not oauth:
+        oauth = OAuth(
+            access_token=credentials.token,
+            refresh_token=credentials.refresh_token,
+            expires_at=credentials.expiry,
+            user_id=user.id  # type: ignore
+        )
+        session_db.add(oauth)
+        session_db.commit()
+
     return redirect('/protected_area')
 
 

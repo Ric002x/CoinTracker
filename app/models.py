@@ -1,4 +1,4 @@
-from sqlalchemy import (Column, Float, ForeignKey, Integer, String,
+from sqlalchemy import (Column, DateTime, Float, ForeignKey, Integer, String,
                         create_engine)
 from sqlalchemy.orm import declarative_base, sessionmaker
 
@@ -24,6 +24,22 @@ class User(Base):
 
     def __str__(self):
         return f'{self.username}'
+
+
+class OAuth(Base):
+    __tablename__ = 'user_tokens'
+
+    id = Column('id', Integer, primary_key=True, autoincrement=True)
+    access_token = Column('access_token', String)
+    refresh_token = Column('refresh_token', String)
+    expires_at = Column(DateTime)
+    user_id = Column('user_id', ForeignKey('user.id'))
+
+    def __init__(self, access_token, refresh_token, expires_at, user_id):
+        self.access_token = access_token
+        self.refresh_token = refresh_token
+        self.expires_at = expires_at
+        self.user_id = user_id
 
 
 class TargetValue(Base):
