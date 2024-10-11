@@ -1,5 +1,5 @@
-from sqlalchemy import (Column, Float, ForeignKey, Integer, String,
-                        create_engine)
+from sqlalchemy import (Column, DateTime, Float, ForeignKey, Integer, String,
+                        create_engine, func)
 from sqlalchemy.orm import declarative_base, sessionmaker
 
 db = create_engine('sqlite:///mydatabase.db')
@@ -38,6 +38,17 @@ class OAuth(Base):
         self.access_token = access_token
         self.refresh_token = refresh_token
         self.user_id = user_id
+
+
+class CurrencyValues(Base):
+    __tablename__ = 'currency_values'
+
+    id = Column('id', Integer, primary_key=True, autoincrement=True)
+    value_dollar = Column('value_dollar', Float)
+    date = Column('date', DateTime, default=func.now())
+
+    def __init__(self, value_dollar):
+        self.value_dollar = value_dollar
 
 
 class TargetValue(Base):
