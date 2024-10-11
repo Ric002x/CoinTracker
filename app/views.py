@@ -13,6 +13,10 @@ def home():
 
 class Alerts(Resource):
     @token_is_required
+    def get(self):
+        return {"Test": 'Ok'}
+
+    @token_is_required
     def post(self):
         data = request.json
 

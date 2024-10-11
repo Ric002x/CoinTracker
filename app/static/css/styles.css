@@ -16,6 +16,10 @@ body {
     /* background-color: #FEFFD2; */
 }
 
+.error {
+    color: red;
+}
+
 .hero {
     padding: 5rem;
 }

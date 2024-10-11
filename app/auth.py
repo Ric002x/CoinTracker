@@ -4,11 +4,12 @@ from functools import wraps
 
 import google.auth.transport.requests
 import requests
-from flask import Blueprint, abort, redirect, request, session
+from flask import Blueprint, abort, flash, redirect, request, session
 from google.oauth2 import id_token
 from google_auth_oauthlib.flow import Flow
 from models import OAuth, User, session_db
 from pip._vendor import cachecontrol
+from utils import decrypt_token, encrypt_token
 
 GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_OAUTH_CLIENT_ID")
 GOOGLE_CLIENT_SECRET = os.environ.get("GOOGLE_OAUTH_CLIENT_SECRET")
@@ -27,6 +28,16 @@ auth_pb = Blueprint('auth', __name__)
 
 
 def login_is_required(function):
+    """
+    Decorator that checks if the user is logged in by verifying if 'google_id'
+    exists in the Flask session.
+
+    The 'google_id' is stored in the session when a user logs in successfully.
+    This is typically done by caching the user's session after authenticating
+    with Google. If 'google_id' is not present in the session, it implies that
+    the user is not logged in, and appropriate actions (e.g., redirect to
+    login) should be taken.
+    """
     def wrapper(*args, **kwargs):
         if 'google_id' not in session:
             return abort(401)
@@ -35,29 +46,67 @@ def login_is_required(function):
 
 
 def token_is_required(function):
+    """
+    Decorator that validates the access token provided in the request headers
+    via the Google API. If the access token is invalid, it attempts to obtain
+    a new one using the associated refresh token.
+
+    - If the access token is valid, the request proceeds as normal.
+    - If the access token is invalid but the refresh token is valid, a new
+      access token is fetched and the request proceeds.
+    - If both the access token and refresh token are invalid, the user is
+      redirected to the login page to re-authenticate.
+
+    This ensures that API requests are always authenticated with a valid token.
+    """
     @wraps(function)
     def wrapper(*args, **kwargs):
+        # Check if the access token is present in the Authorization header
         access_token = request.headers.get(
-            'Authorization')  # Pegue o token do header
+            'Authorization')
+        # If no access token is found, respond with 401 Unauthorized error
         if access_token is None:
-            # Não autorizado se 'Authorization' não estiver presente
             return abort(401)
 
-        # Verifica o access_token com os servidores do Google
-        token_info = verify_access_token(access_token.replace('Bearer ', ''))
+        key_access_token = access_token.replace('Bearer ', '')
+
+        # Verify the access token using Google's API
+        token_info = verify_access_token(key_access_token)
+
+        # If the token is invalid, try to generate a new token
         if not token_info:
             try:
-                oauth = get_oauth(access_token.replace('Bearer ', ''))
-                new_token = refresh_token(oauth.refresh_token)  # type: ignore
+                # Search for the associated refresh token with de access token
+                oauth = get_oauth(key_access_token)
+
+                # Decrypt the stored refresh token from the database
+                decrypted_refresh_token = decrypt_token(
+                    oauth.refresh_token)  # type: ignore
+                ...
+
+                # Use the decrypted refresh token to generate
+                # a new access token
+                new_token = refresh_token(decrypted_refresh_token)
+                if not new_token:
+                    flash(
+                        "Sua sessão foi encerrada, faça login novamente "
+                        "para continuar", "error")
+                    oauth.refresh_token = None  # type: ignore
+                    oauth.access_token = None  # type: ignore
+                    session_db.commit()
+                    return redirect('/')
+
+                # If a new access token was successfully generated,
+                # update the database
                 access_token = new_token['access_token']  # type: ignore
                 if new_token:
-                    # type: ignore
                     oauth.access_token = access_token  # type: ignore
                     session_db.commit()
             except Exception as e:
                 return {
                     "Error": f"The server could not refresh the token: {e}"}
 
+        # Fetch the OAuth record again to get user info
         oauth = get_oauth(access_token.replace('Bearer ', ''))
         user = session_db.query(User).filter_by(
             id=oauth.user_id).first()  # type: ignore
@@ -149,18 +198,20 @@ def callback():
         google_id=id_info['sub']).first()
     oauth = session_db.query(OAuth).filter_by(
         user_id=user.id).first()  # type: ignore
+
+    access_token = credentials.token
+    refresh_token = encrypt_token(credentials.refresh_token)
     if not oauth:
         oauth = OAuth(
-            access_token=credentials.token,
-            refresh_token=credentials.refresh_token,
+            access_token=access_token,
+            refresh_token=refresh_token,
             user_id=user.id  # type: ignore
         )
         session_db.add(oauth)
         session_db.commit()
     else:
-        oauth.access_token = credentials.token
-        oauth.refresh_token = credentials.refresh_token
-        oauth.expires_at = credentials.expiry
+        oauth.access_token = access_token
+        oauth.refresh_token = refresh_token
         session_db.commit()
 
     return redirect('/protected_area')
