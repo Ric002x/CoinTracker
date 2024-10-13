@@ -30,12 +30,10 @@ class OAuth(Base):
     __tablename__ = 'user_tokens'
 
     id = Column('id', Integer, primary_key=True, autoincrement=True)
-    access_token = Column('access_token', String)
     refresh_token = Column('refresh_token', String)
     user_id = Column('user_id', ForeignKey('user.id', ondelete="CASCADE"))
 
-    def __init__(self, access_token, refresh_token, user_id):
-        self.access_token = access_token
+    def __init__(self, refresh_token, user_id):
         self.refresh_token = refresh_token
         self.user_id = user_id
 

@@ -227,7 +227,6 @@ def callback():
     refresh_token = encrypt_token(credentials.refresh_token)
     if not oauth:
         oauth = OAuth(
-            access_token=access_token,
             refresh_token=refresh_token,
             user_id=user.id  # type: ignore
         )
@@ -243,17 +242,13 @@ def callback():
     response.set_cookie('google_id', str(
         id_info['sub']), httponly=True, secure=True)
 
-    return redirect('/protected_area')
-
-
-@auth_pb.route("/protected_area")
-@login_is_required
-def protected_area():
-    return f"Hello {session['name']}! <br/> <a href='/logout'>" \
-        "<button>Logout</button></a>"
+    return response
 
 
 @auth_pb.route('/logout')
 def logout():
     session.clear()
-    return redirect("/")
+    response = redirect('/')
+    response.set_cookie('jwt', '')
+    response.set_cookie('google_id', '')
+    return response
