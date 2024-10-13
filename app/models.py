@@ -32,7 +32,7 @@ class OAuth(Base):
     id = Column('id', Integer, primary_key=True, autoincrement=True)
     access_token = Column('access_token', String)
     refresh_token = Column('refresh_token', String)
-    user_id = Column('user_id', ForeignKey('user.id'))
+    user_id = Column('user_id', ForeignKey('user.id', ondelete="CASCADE"))
 
     def __init__(self, access_token, refresh_token, user_id):
         self.access_token = access_token
@@ -56,7 +56,7 @@ class TargetValue(Base):
 
     id = Column('id', Integer, primary_key=True, autoincrement=True)
     value = Column('value', Float)
-    user_id = Column('user_id', ForeignKey('user.id'))
+    user_id = Column('user_id', ForeignKey('user.id', ondelete="CASCADE"))
 
     def __init__(self, value, user_id):
         self.value = value

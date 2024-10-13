@@ -3,7 +3,7 @@ import os
 from auth import auth_pb
 from flask import Flask
 from flask_restful import Api
-from utils import start_schedule
+# from utils import start_schedule
 from views import Alerts, main
 
 app = Flask(__name__)
@@ -17,5 +17,5 @@ app.register_blueprint(auth_pb)
 api.add_resource(Alerts, "/api/alert/")
 
 if __name__ == "__main__":
-    start_schedule()
+    # start_schedule()
     app.run(host='0.0.0.0', port=80, debug=False)
