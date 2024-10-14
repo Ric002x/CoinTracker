@@ -176,10 +176,10 @@ def refresh_token_route():
     return response
 
 
-@auth_pb.route('/login')
+@auth_pb.route('/login/create')
 def login():
     if 'google_id' in session or request.headers.get('Authorization'):
-        return redirect('/protected_area')
+        return {"Error": "Usuário já logado"}
     authorization_url, state = flow.authorization_url(prompt='consent')
     session['state'] = state
     return redirect(authorization_url)
@@ -247,8 +247,11 @@ def callback():
 
 @auth_pb.route('/logout')
 def logout():
-    session.clear()
-    response = redirect('/')
-    response.set_cookie('jwt', '')
-    response.set_cookie('google_id', '')
-    return response
+    if 'google_id' in session or request.headers.get('Authorization'):
+        session.clear()
+        response = redirect('/')
+        response.set_cookie('jwt', '')
+        response.set_cookie('google_id', '')
+        return {"Success": "Usuário Deslogado"}
+    else:
+        return {"Error": "Não há usuário logado"}
