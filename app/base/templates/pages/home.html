@@ -1,12 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flask Application</title>
-    <link rel="stylesheet" href={{ url_for('static', filename="css/style.css") }}>
-</head>
-<body>
+{% extends "pages/base.html" %}
+
+{% block content %}
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
         <ul class="flashes">
@@ -17,6 +11,16 @@
       {% endif %}
     {% endwith %}
 
+    <main class="hero">
+      <div class="hero-text">
+         <h1 class="roboto-bold-big">Acompanhe a variação de fluxo cambial do dólar</h1>
+         <p class="montserrat-regular-normal">Se inscreva no site, e receba notificações dos valores de cotações mais recentes</p>
+      </div>
+      <div class="hero-figure">
+         <div class="figure1"></div>
+         <div class="figure2"></div>
+         <div class="figure3"></div>
+      </div>
+   </main>
 
-</body>
-</html>
+{% endblock content %}

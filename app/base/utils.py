@@ -66,7 +66,7 @@ def get_currency():
     a column named user_id, and a notification email will be send to those user
     using the function 'send_email'.
     """
-    from run import app
+    from .run import app
     with app.app_context():
         url = "https://economia.awesomeapi.com.br/json/last/USD-BRL"
         response = requests.get(url)

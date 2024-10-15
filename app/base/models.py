@@ -25,6 +25,13 @@ class User(Base):
     def __str__(self):
         return f'{self.username}'
 
+    def to_dict(self):
+        return {
+            'username': self.username,
+            'google_id': self.google_id,
+            'email': self.email
+        }
+
 
 class OAuth(Base):
     __tablename__ = 'user_tokens'

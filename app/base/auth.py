@@ -44,6 +44,13 @@ def login_is_required(function):
     return wrapper
 
 
+def load_user():
+    if 'google_id' in session:
+        user = session_db.query(User).filter_by(
+            google_id=session['google_id']).first()
+        return user
+
+
 @auth_pb.route('/login/create')
 def login():
     if 'google_id' in session:

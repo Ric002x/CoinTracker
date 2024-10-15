@@ -1,0 +1,18 @@
+<header class="main-header roboto-regular-normal">
+    <div class="main-logo h-100">
+        <a href="/">
+            <img class="h-100" src="{{ url_for('static', filename="assets/logo2.png") }}" alt="" />
+        </a>
+    </div>
+    <nav class="nav-div h-100">
+        <ul>
+            <li><a href="/suporte">Suporte</a></li>
+            <li><a href="/sobre">Sobre</a></li>
+            {% if not user %}
+                <li><a href="/login" class="login-button"><i class="fa-solid fa-right-to-bracket"></i>Login</a></li>
+            {% else %}
+                <li><a href="/logout" class="logout-button">Logout<i class="fa-solid fa-right-from-bracket"></i></a></li>
+            {% endif %}
+        </ul>
+    </nav>
+</header>
