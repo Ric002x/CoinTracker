@@ -1,11 +1,15 @@
 import os
 
-from auth import auth_pb
 from flask import Flask
 from flask_cors import CORS
 from flask_restful import Api
-from utils import start_schedule
-from views import Alerts, main
+
+from app.api.auth import auth_pb_api
+from app.api.views import Alerts
+
+from .auth import auth_pb
+from .utils import start_schedule
+from .views import main
 
 app = Flask(__name__)
 api = Api(app)
@@ -18,6 +22,7 @@ os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = "1"
 
 app.register_blueprint(main)
 app.register_blueprint(auth_pb)
+app.register_blueprint(auth_pb_api)
 api.add_resource(Alerts, "/api/alert/")
 
 

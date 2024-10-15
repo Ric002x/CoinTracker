@@ -8,8 +8,9 @@ import schedule
 import sendgrid
 from cryptography.fernet import Fernet
 from dotenv import load_dotenv
-from models import CurrencyValues, TargetValue, User, session_db
 from sendgrid.helpers.mail import Content, Email, Mail, To
+
+from .models import CurrencyValues, TargetValue, User, session_db
 
 load_dotenv()
 
