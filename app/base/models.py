@@ -55,6 +55,13 @@ class CurrencyValues(Base):
     def __init__(self, value_dollar):
         self.value_dollar = value_dollar
 
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'value_dollar': self.value_dollar,
+            'date': self.date
+        }
+
 
 class TargetValue(Base):
     __tablename__ = 'target_value'

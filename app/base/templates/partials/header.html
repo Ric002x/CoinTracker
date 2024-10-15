@@ -6,12 +6,13 @@
     </div>
     <nav class="nav-div h-100">
         <ul>
-            <li><a href="/suporte">Suporte</a></li>
-            <li><a href="/sobre">Sobre</a></li>
+            <li><a href="#suporte">Suporte</a></li>
+            <li><a href="#sobre">Sobre</a></li>
             {% if not user %}
                 <li><a href="/login" class="login-button"><i class="fa-solid fa-right-to-bracket"></i>Login</a></li>
             {% else %}
-                <li><a href="/logout" class="logout-button">Logout<i class="fa-solid fa-right-from-bracket"></i></a></li>
+                <li><a class="logged-user" href="">{{ user.username}}</a></li>
+                <li><a class="logout-button" href="/logout"><i class="fa-solid fa-right-from-bracket"></i></a></li>
             {% endif %}
         </ul>
     </nav>

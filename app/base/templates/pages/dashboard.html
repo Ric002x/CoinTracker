@@ -1,0 +1,35 @@
+{% extends "pages/base.html" %}
+
+{% block content %}
+<main class="user-dashboard montserrat-regular-normal">
+    <section class="form-section">
+        <h2>Verifique o Valor do Dólar</h2>
+        <form method="post" id="currency-form">
+            {{ form.hidden_tag() }}
+            {{ form.value.label }}
+            <input type="number" name="value" step="0.10" required value=5>
+            {% for error in form.value.errors %}
+                <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}
+            {{ form.submit() }}
+        </form>
+        <p>Adicone um valor, e receba notificação por email quando dólar alcançar o valor desejado</p>
+        <div id="feedback" class="feedback"></div>
+    </section>
+    
+    <section class="info-section">
+        <h2>Cotação Atual do Dólar</h2>
+        <p id="current-rate">R$ {{currency.value_dollar}}</p> <!-- Valor dinâmico -->
+        <p>Última atualização: <span id="last-updated">{{minutes}} minutos</span></p>
+    </section>
+    
+    <section class="tips-section">
+        <h2>Dicas</h2>
+        <ul>
+            <li>Verifique a cotação do dólar regularmente.</li>
+            <li>Armazene seus valores em um diário financeiro.</li>
+            <li>Considere usar aplicativos de monitoramento de câmbio.</li>
+        </ul>
+    </section>
+</main>
+{% endblock content %}

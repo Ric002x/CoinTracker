@@ -28,15 +28,26 @@ O objetivo do projeto é criar um serviço backend que monitore a cotação do d
 
 O Projeto foi construindo seguindo recomendações de boas práticas de estruturação de projetos que utilizam o Flask par criação de aplicações web.
 
-|- `app/`: Diretório com os arquivos utilizados para estruturação do Flask.
-    |- `run.py`: Arquivo de inicialização da aplicação.
-    |- `auth.py`: Administra funções de autenticação.
-    |- `models.py`: Criação da base de dados, tabelas, e seus relacionamentos.
-    |- `views.py`: Views de API da aplicação.
-    |- `utils.py`: Configuração de utilitários da aplicação (SendGrid, Cryptography, Schedule)
-    |- `client_secret.json`: Dados que referenciam a API de OAuth2 do Google (ID do Cliente). Necessário para o `Flow`.
-|- `.env`: Variáveis de ambiente do projeto.
+```
+- app/: Diretório com os arquivos utilizados para estruturação do Flask.
 
+    - api/
+        - auth.py
+        - views.py
+        - client_secret.json
+
+    - base/
+        - run.py: Arquivo de inicialização da aplicação.
+        - auth.py: Administra funções de autenticação.
+        - models.py: Criação da base de dados, tabelas, e seus relacionamentos.
+        - views.py: Views de API da aplicação.
+        - utils.py: Configuração de utilitários da aplicação (SendGrid, Cryptography, Schedule)
+        - client_secret.json: Dados que referenciam a API de OAuth2 do Google (ID do Cliente). Necessário para o Flow.
+
+- wsgi.py:
+
+- .env: Variáveis de ambiente do projeto.
+```
 
 ## Instalação e Configuração
 

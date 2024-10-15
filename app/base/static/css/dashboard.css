@@ -1,0 +1,71 @@
+.user-dashboard {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 20px;
+    width: 90%;
+    margin: 50px auto;
+    height: 528px;
+}
+
+.form-section {
+    background-color: #222;
+    grid-column: 1 / 2;
+    grid-row: 1 / 3;
+    padding: 2rem;
+}
+
+.form-section h2 {
+    margin-bottom: 2.5rem;
+}
+
+.form-section label {
+    display: block;
+    margin-bottom: 10px;
+}
+
+.form-section input[type="number"] {
+    width: 100%;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #555;
+    background-color: #333;
+    color: #fff;
+}
+
+.form-section input[type="submit"] {
+    margin-top: 1.5rem;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    background-color: var(--color-secondary);
+    font-weight: 600;
+    cursor: pointer;
+    color: var(--color-text);
+}
+
+.form-section p {
+    margin-top: 2rem;
+}
+
+.info-section {
+    background-color: #222;
+    grid-column: 2; /* Ocupa a coluna 2 */
+    grid-row: 1; /* Ocupa a linha 1 */
+    padding: 2rem;
+}
+
+.info-section h2 {
+    margin-bottom: 2.5rem;
+}
+
+.tips-section {
+    background-color: #222;
+    grid-column: 2; /* Ocupa a coluna 2 */
+    grid-row: 2; /* Ocupa a linha 2 */
+    padding: 2rem;
+}
+
+.tips-section h2 {
+    margin-bottom: 2.5rem;
+}

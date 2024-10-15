@@ -3,7 +3,9 @@ import pathlib
 
 import google.auth.transport.requests
 import requests
-from flask import Blueprint, abort, flash, redirect, request, session
+from flask import Blueprint, abort, flash, redirect
+from flask import render_template as flask_render_template
+from flask import request, session
 from google.oauth2 import id_token
 from google_auth_oauthlib.flow import Flow
 from pip._vendor import cachecontrol
@@ -37,18 +39,50 @@ def login_is_required(function):
     the user is not logged in, and appropriate actions (e.g., redirect to
     login) should be taken.
     """
-    def wrapper(*args, **kwargs):
+    def wrapper():
         if 'google_id' not in session:
-            return abort(401)
+            flash("Usuário não logado. Faça login para continar", "error")
+            return redirect('/login')
         return function()
     return wrapper
 
 
-def load_user():
+def render(template, *args, **kwargs):
     if 'google_id' in session:
-        user = session_db.query(User).filter_by(
+        logged_user = session_db.query(User).filter_by(
             google_id=session['google_id']).first()
-        return user
+        context = {'user': logged_user.to_dict() if logged_user else None}
+        return flask_render_template(
+            template, *args, **kwargs, **context)
+
+    return flask_render_template(template, *args, **kwargs)
+
+
+def render_restricted(template, *args, **kwargs):
+    if 'google_id' not in session:
+        flash("É necessário estar logado para acessar este recurso", "warning")
+        return redirect('/login')
+
+    logged_user = session_db.query(User).filter_by(
+        google_id=session['google_id']).first()
+    context = {'user': logged_user.to_dict() if logged_user else None}
+    return flask_render_template(
+        template, *args, **kwargs, **context)
+
+
+def get_user():
+    user = session_db.query(User).filter_by(
+        google_id=session['google_id']).first()
+    return user
+
+
+def user_alredy_logged(function):
+    def wrapper():
+        if 'google_id' in session:
+            flash("Usuário já logado!", "error")
+            return redirect('/')
+        return function()
+    return wrapper
 
 
 @auth_pb.route('/login/create')

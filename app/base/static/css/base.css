@@ -2,6 +2,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
 @import url(main.css);
 @import url(login.css);
+@import url(header.css);
+@import url(footer.css);
+@import url(dashboard.css);
 
 * {
   margin: 0;
@@ -52,4 +55,28 @@ a {
   font-optical-sizing: auto;
   font-weight: 400;
   font-size: 16px
+}
+
+.message-flash {
+  margin: 0 auto;
+  margin-top: 20px;
+  width: 80%;
+  display: flex;
+  place-content: center;
+  padding: 1.2rem;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 8px;
+}
+
+.message-flash:has(.error) {
+  background-image: linear-gradient(to right, #ff42428a, #ff59597b);
+}
+
+.message-flash:has(.success) {
+  background-image: linear-gradient(to right, #3bff7cae, #6bff9cae);
+}
+
+.message-flash:has(.warning) {
+  background-image: linear-gradient(to right, #fffc3ccd, #fffc52cd);
 }
