@@ -5,7 +5,11 @@
     gap: 20px;
     width: 90%;
     margin: 50px auto;
-    height: 528px;
+    min-height: 428px;
+}
+
+.user-dashboard section {
+    box-shadow: 1px 1px 10px #333333b6;
 }
 
 .form-section {

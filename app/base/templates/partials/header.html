@@ -5,13 +5,14 @@
         </a>
     </div>
     <nav class="nav-div h-100">
-        <ul>
+        <div id="showNavItens"><i class="fa-solid fa-bars"></i></div>
+        <ul id="navItens">
             <li><a href="#suporte">Suporte</a></li>
             <li><a href="#sobre">Sobre</a></li>
             {% if not user %}
                 <li><a href="/login" class="login-button"><i class="fa-solid fa-right-to-bracket"></i>Login</a></li>
             {% else %}
-                <li><a class="logged-user" href="">{{ user.username}}</a></li>
+                <li><a class="logged-user" href="/dashboard">{{ user.username }}</a></li>
                 <li><a class="logout-button" href="/logout"><i class="fa-solid fa-right-from-bracket"></i></a></li>
             {% endif %}
         </ul>

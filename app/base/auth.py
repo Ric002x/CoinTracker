@@ -1,5 +1,6 @@
 import os
 import pathlib
+from functools import wraps
 
 import google.auth.transport.requests
 import requests
@@ -40,7 +41,7 @@ def login_is_required(function):
     login) should be taken.
     """
     def wrapper():
-        if 'google_id' not in session:
+        if 'user' not in session:
             flash("Usuário não logado. Faça login para continar", "error")
             return redirect('/login')
         return function()
@@ -48,9 +49,13 @@ def login_is_required(function):
 
 
 def render(template, *args, **kwargs):
-    if 'google_id' in session:
+    if 'user' in session:
         logged_user = session_db.query(User).filter_by(
-            google_id=session['google_id']).first()
+            id=session['user']).first()
+        if not logged_user:
+            flash(
+                "Usuário não encontrado na sessão. Por favor,"
+                " faça login novamente", "error")
         context = {'user': logged_user.to_dict() if logged_user else None}
         return flask_render_template(
             template, *args, **kwargs, **context)
@@ -59,12 +64,12 @@ def render(template, *args, **kwargs):
 
 
 def render_restricted(template, *args, **kwargs):
-    if 'google_id' not in session:
+    if 'user' not in session:
         flash("É necessário estar logado para acessar este recurso", "warning")
         return redirect('/login')
 
     logged_user = session_db.query(User).filter_by(
-        google_id=session['google_id']).first()
+        id=session['user']).first()
     context = {'user': logged_user.to_dict() if logged_user else None}
     return flask_render_template(
         template, *args, **kwargs, **context)
@@ -72,22 +77,23 @@ def render_restricted(template, *args, **kwargs):
 
 def get_user():
     user = session_db.query(User).filter_by(
-        google_id=session['google_id']).first()
+        id=session['user']).first()
     return user
 
 
 def user_alredy_logged(function):
-    def wrapper():
-        if 'google_id' in session:
+    @wraps(function)
+    def wrapper(*args, **kwargs):
+        if 'user' in session:
             flash("Usuário já logado!", "error")
             return redirect('/')
-        return function()
+        return function(*args, **kwargs)
     return wrapper
 
 
-@auth_pb.route('/login/create')
-def login():
-    if 'google_id' in session:
+@auth_pb.route('/login/oauth')
+def login_oauth():
+    if 'user' in session:
         return {"Error": "Usuário já logado"}
     authorization_url, state = flow.authorization_url(prompt='consent')
     session['state'] = state
@@ -119,13 +125,18 @@ def callback():
         user = User(
             google_id=id_info["sub"],  # type: ignore
             username=id_info["name"],
-            email=id_info["email"]
+            email=id_info["email"],
+            password=None,
         )
         session_db.add(user)
+        session_db.commit()
+    elif user and user.google_id is None:
+        user.google_id = id_info["sub"]
         session_db.commit()
 
     session['google_id'] = id_info.get('sub')
     session['name'] = id_info.get('name')
+    session['user'] = user.id
 
     flash("Login feito com sucesso", "success")
     return redirect('/')
@@ -133,7 +144,7 @@ def callback():
 
 @auth_pb.route('/logout')
 def logout():
-    if 'google_id' in session:
+    if 'user' in session:
         session.clear()
         flash("Logout feito com sucesso", "success")
         return redirect('/')

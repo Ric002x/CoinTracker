@@ -1,6 +1,10 @@
+from datetime import datetime
+
+import pytz
 from sqlalchemy import (Column, DateTime, Float, ForeignKey, Integer, String,
                         create_engine, func)
 from sqlalchemy.orm import declarative_base, sessionmaker
+from werkzeug.security import check_password_hash, generate_password_hash
 
 db = create_engine('sqlite:///mydatabase.db')
 Session = sessionmaker(bind=db)
@@ -16,14 +20,22 @@ class User(Base):
     google_id = Column('google_id', String)
     username = Column('username', String)
     email = Column('email', String, unique=True)
+    password = Column('senha', String)
 
-    def __init__(self, google_id, username, email):
+    def __init__(self, google_id, username, email, password):
         self.google_id = google_id
         self.username = username
         self.email = email
+        self.password = password
 
     def __str__(self):
         return f'{self.username}'
+
+    def set_password(self, password):
+        self.password = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.password, password)  # type: ignore
 
     def to_dict(self):
         return {
@@ -50,7 +62,9 @@ class CurrencyValues(Base):
 
     id = Column('id', Integer, primary_key=True, autoincrement=True)
     value_dollar = Column('value_dollar', Float)
-    date = Column('date', DateTime, default=func.now())
+    date = Column('date', DateTime,
+                  default=lambda: datetime.now(pytz.timezone(
+                      'America/Fortaleza')))
 
     def __init__(self, value_dollar):
         self.value_dollar = value_dollar

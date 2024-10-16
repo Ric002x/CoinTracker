@@ -1,0 +1,49 @@
+.register {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 700px;
+}
+
+.register section {
+    background-color: #333;
+    padding: 2rem;
+    width: 500px;
+}
+
+.register section h1 {
+    margin-bottom: 2.5rem;
+    text-align: center;
+}
+
+.register form {
+    display: flex;
+    flex-direction: column;
+}
+
+.dft-form label {
+    display: block;
+    margin: 20px 0 10px 0;
+}
+
+.dft-form input[type="text"],
+.dft-form input[type="email"],
+.dft-form input[type="password"] {
+    width: 100%;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #555;
+    background-color: #333;
+    color: #fff;
+}
+
+.dft-form input[type="submit"] {
+    margin-top: 1.5rem;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    background-color: var(--color-secondary);
+    font-weight: 600;
+    cursor: pointer;
+    color: var(--color-text);
+}
