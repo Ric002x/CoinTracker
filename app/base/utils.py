@@ -8,6 +8,7 @@ import schedule
 import sendgrid
 from cryptography.fernet import Fernet
 from dotenv import load_dotenv
+from flask import current_app
 from sendgrid.helpers.mail import Content, Email, Mail, To
 
 from .models import CurrencyValues, TargetValue, User, session_db
@@ -66,8 +67,7 @@ def get_currency():
     a column named user_id, and a notification email will be send to those user
     using the function 'send_email'.
     """
-    from .run import app
-    with app.app_context():
+    with current_app.app_context():
         url = "https://economia.awesomeapi.com.br/json/last/USD-BRL"
         response = requests.get(url)
         data = response.json()

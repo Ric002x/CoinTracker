@@ -50,15 +50,18 @@ def login_page():
     if form.validate_on_submit():
         data = form.data
         user = session_db.query(User).filter_by(email=data['email']).first()
-        if user and user.check_password(data['password']):
+        if user:
+            try:
+                user.check_password(data['password']) if user else None
+            except Exception:
+                flash("E-mail ou senha inválidos", "error")
+                return redirect('/login')
             session['user'] = user.id
             session['name'] = user.username
             flash("Login realizado com sucesso", "success")
             return redirect('/')
-        elif user and user.password is None:
-            flash("Erro no login. Tente logar com o Google", "error")
-        else:
-            flash('E-mail ou senha inválidos', 'error')
+    elif not form.validate_on_submit():
+        flash("Falha no login", "error")
 
     context = {
         'form': form
@@ -124,10 +127,10 @@ def user_dashboard():
     if currency:
         last_update = currency.date if currency else None
 
-    actual_date = datetime.datetime.now()
-    if last_update is not None and actual_date is not None:
-        sub = actual_date - last_update
-        minutes = parse_time(f"{sub}")
+        actual_date = datetime.datetime.now()
+        if last_update is not None and actual_date is not None:
+            sub = actual_date - last_update
+            minutes = parse_time(f"{sub}")
     context = {
         'currency': currency.to_dict() if currency else None,
         'minutes': str(minutes).replace('.0', '') if minutes else None,

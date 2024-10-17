@@ -1,12 +1,18 @@
+import os
 from datetime import datetime
 
 import pytz
+from dotenv import load_dotenv
 from sqlalchemy import (Column, DateTime, Float, ForeignKey, Integer, String,
-                        create_engine, func)
+                        create_engine)
 from sqlalchemy.orm import declarative_base, sessionmaker
 from werkzeug.security import check_password_hash, generate_password_hash
 
-db = create_engine('sqlite:///mydatabase.db')
+load_dotenv()
+
+# db = create_engine(str(os.getenv("DATABASE_POSTGRE")))
+db = create_engine(str(os.environ.get("DATABASE_SQLITE")))
+
 Session = sessionmaker(bind=db)
 session_db = Session()
 
