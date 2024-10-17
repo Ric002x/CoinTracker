@@ -1,32 +1,21 @@
-import os
 from datetime import datetime
 
 import pytz
-from dotenv import load_dotenv
-from sqlalchemy import (Column, DateTime, Float, ForeignKey, Integer, String,
-                        create_engine)
-from sqlalchemy.orm import declarative_base, sessionmaker
 from werkzeug.security import check_password_hash, generate_password_hash
 
-load_dotenv()
+from app.base import db
 
-# db = create_engine(str(os.getenv("DATABASE_POSTGRE")))
-db = create_engine(str(os.environ.get("DATABASE_SQLITE")))
-
-Session = sessionmaker(bind=db)
-session_db = Session()
-
-Base = declarative_base()
+session_db = db.session
 
 
-class User(Base):
+class User(db.Model):
     __tablename__ = 'user'
 
-    id = Column('id', Integer, primary_key=True, autoincrement=True)
-    google_id = Column('google_id', String)
-    username = Column('username', String)
-    email = Column('email', String, unique=True)
-    password = Column('senha', String)
+    id = db.Column('id', db.Integer, primary_key=True)
+    google_id = db.Column('google_id', db.String)
+    username = db.Column('username', db.String)
+    email = db.Column('email', db.String, unique=True)
+    password = db.Column('senha', db.String)
 
     def __init__(self, google_id, username, email, password):
         self.google_id = google_id
@@ -51,26 +40,27 @@ class User(Base):
         }
 
 
-class OAuth(Base):
+class OAuth(db.Model):
     __tablename__ = 'user_tokens'
 
-    id = Column('id', Integer, primary_key=True, autoincrement=True)
-    refresh_token = Column('refresh_token', String)
-    user_id = Column('user_id', ForeignKey('user.id', ondelete="CASCADE"))
+    id = db.Column('id', db.Integer, primary_key=True, autoincrement=True)
+    refresh_token = db.Column('refresh_token', db.String)
+    user_id = db.Column('user_id', db.ForeignKey(
+        'user.id', ondelete="CASCADE"))
 
     def __init__(self, refresh_token, user_id):
         self.refresh_token = refresh_token
         self.user_id = user_id
 
 
-class CurrencyValues(Base):
+class CurrencyValues(db.Model):
     __tablename__ = 'currency_values'
 
-    id = Column('id', Integer, primary_key=True, autoincrement=True)
-    value_dollar = Column('value_dollar', Float)
-    date = Column('date', DateTime,
-                  default=lambda: datetime.now(pytz.timezone(
-                      'America/Fortaleza')))
+    id = db.Column('id', db.Integer, primary_key=True, autoincrement=True)
+    value_dollar = db.Column('value_dollar', db.Float)
+    date = db.Column('date', db.DateTime,
+                     default=lambda: datetime.now(pytz.timezone(
+                         'America/Fortaleza')))
 
     def __init__(self, value_dollar):
         self.value_dollar = value_dollar
@@ -83,12 +73,13 @@ class CurrencyValues(Base):
         }
 
 
-class TargetValue(Base):
+class TargetValue(db.Model):
     __tablename__ = 'target_value'
 
-    id = Column('id', Integer, primary_key=True, autoincrement=True)
-    value = Column('value', Float)
-    user_id = Column('user_id', ForeignKey('user.id', ondelete="CASCADE"))
+    id = db.Column('id', db.Integer, primary_key=True, autoincrement=True)
+    value = db.Column('value', db.Float)
+    user_id = db.Column('user_id', db.ForeignKey(
+        'user.id', ondelete="CASCADE"))
 
     def __init__(self, value, user_id):
         self.value = value
@@ -96,6 +87,3 @@ class TargetValue(Base):
 
     def __str__(self):
         return f'{self.value}'
-
-
-Base.metadata.create_all(bind=db)
