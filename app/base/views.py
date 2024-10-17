@@ -1,6 +1,6 @@
 import datetime
 
-from flask import Blueprint, flash, redirect, session
+from flask import Blueprint, abort, flash, redirect, request, session
 
 from .auth import get_user, render, render_restricted, user_alredy_logged
 from .forms import AlertFormPOST, LoginForm, RegisterForm
@@ -23,6 +23,21 @@ def home():
 @user_alredy_logged
 def register_view():
     form = RegisterForm()
+
+    context = {
+        'form': form,
+        'form_action': '/register/create'
+    }
+    return render('pages/register.html', **context)
+
+
+@main.route('/register/create', methods=["POST", "GET"])
+def register_create():
+    if not request.method == 'POST':
+        abort(404)
+
+    form = RegisterForm(request.form)
+
     if form.validate_on_submit():
         data = form.data
         user = User(
@@ -35,38 +50,48 @@ def register_view():
         session_db.add(user)
         session_db.commit()
         flash("Usuário cadastrado! Faça login para continuar.", "success")
-        redirect('/login')
-
-    context = {
-        'form': form
-    }
-    return render('pages/register.html', **context)
+    return redirect('/login')
 
 
 @main.route('/login', methods=["GET", "POST"])
 @user_alredy_logged
 def login_page():
     form = LoginForm()
+
+    context = {
+        'form': form,
+        'form_action': '/login/create'
+    }
+    return render('pages/login.html', **context)
+
+
+@main.route('/login/create', methods=["GET", "POST"])
+def login_create():
+    if not request.method == "POST":
+        abort(404)
+
+    form = LoginForm(request.form)
+
     if form.validate_on_submit():
         data = form.data
         user = session_db.query(User).filter_by(email=data['email']).first()
         if user:
             try:
-                user.check_password(data['password']) if user else None
+                check = user.check_password(data['password']) if user else None
+                if check is False:
+                    flash("E-mail ou senha inválidos", "error")
+                    return redirect('/login')
             except Exception:
                 flash("E-mail ou senha inválidos", "error")
                 return redirect('/login')
             session['user'] = user.id
             session['name'] = user.username
             flash("Login realizado com sucesso", "success")
-            return redirect('/')
     elif not form.validate_on_submit():
         flash("Falha no login", "error")
+        return redirect('/login')
 
-    context = {
-        'form': form
-    }
-    return render('pages/login.html', **context)
+    return redirect('/')
 
 
 @main.route('/dashboard', methods=["GET", "POST"])
