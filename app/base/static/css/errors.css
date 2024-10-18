@@ -1,0 +1,9 @@
+.page-not-found {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 545px;
+    flex-direction: column;
+    gap: 2rem;
+}
+

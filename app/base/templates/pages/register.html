@@ -4,12 +4,12 @@
 <main class="register montserrat-regular-normal">
     <section>
         <h1>Registrar-se</h1>
-        <form action="{{form_action}}" class="dft-form" method="POST">
+        <form class="dft-form" method="POST">
             {{ form.hidden_tag() }}
             
             <div class="form-group">
             {{form.username.label}}
-            <input id="username" name="username" required type="text" value="" placeholder="Ricardo Oliveira">
+            <input id="username" name="username" required type="text" value="{% if form.username.data %}{{form.username.data}}{% endif %}" placeholder="Ricardo Oliveira">
             {% for error in form.username.errors %}
                 <span style="color: red;">{{ error }}</span>
             {% endfor %}
@@ -17,7 +17,7 @@
 
             <div class="form-group">
             {{form.email.label}}
-            <input id="email" name="email" required type="email" value="" placeholder="ricardo_email@email.com">
+            <input id="email" name="email" required type="email" value="{% if form.email.data %}{{form.email.data}}{% endif %}" placeholder="ricardo_email@email.com">
             {% for error in form.email.errors %}
                 <span style="color: red;">{{ error }}</span>
             {% endfor %}

@@ -10,7 +10,10 @@
             <li><a href="#suporte">Suporte</a></li>
             <li><a href="#sobre">Sobre</a></li>
             {% if not user %}
-                <li><a href="/login" class="login-button"><i class="fa-solid fa-right-to-bracket"></i>Login</a></li>
+                <li class="register-login-buttons">
+                    <span><i class="fa-solid fa-right-to-bracket"></i><a href="/login">Login</a></span>
+                    <span><a href="/register">Cadastro</a><i class="fa-solid fa-user-plus"></i></span>
+                </li>
             {% else %}
                 <li><a class="logged-user" href="/dashboard">{{ user.username }}</a></li>
                 <li><a class="logout-button" href="/logout"><i class="fa-solid fa-right-from-bracket"></i></a></li>

@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, render_template
 from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
@@ -14,7 +14,6 @@ def create_app():
     from app.api.views import Alerts
 
     from .auth import auth_pb
-    from .utils import start_schedule
     from .views import main
 
     app = Flask(__name__)
@@ -43,8 +42,6 @@ def create_app():
     # from flask_cors import CORS
     # CORS(app, origins=['http://127.0.0.1:5500'])
 
-    start_schedule()
-
     app.secret_key = os.environ.get("FLASK_SECRET_KEY", "supersekrit")
     os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = "1"
 
@@ -52,5 +49,11 @@ def create_app():
     app.register_blueprint(auth_pb)
     app.register_blueprint(auth_pb_api)
     api.add_resource(Alerts, "/api/alert/")
+
+    # error templates
+
+    @app.errorhandler(404)
+    def page_not_found(e):
+        return render_template('pages/errors/404.html'), 404
 
     return app

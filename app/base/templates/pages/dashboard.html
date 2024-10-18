@@ -4,23 +4,25 @@
 <main class="user-dashboard montserrat-regular-normal">
     <section class="form-section">
         <h2>Verifique o Valor do Dólar</h2>
+
         <form method="post" id="currency-form">
             {{ form.hidden_tag() }}
             {{ form.value.label }}
-            <input type="number" name="value" step="0.10" required value={{user_target}}>
+            <input type="number" name="value" step="0.10" required value="{{form.value.data}}">
             {% for error in form.value.errors %}
-                <span style="color: red;">[{{ error }}]</span>
+                <p style="color: red; margin-top: 5px;">{{ error }}</p>
             {% endfor %}
             {{ form.submit() }}
         </form>
+
         <p>Adicone um valor, e receba notificação por email quando dólar alcançar o valor desejado</p>
         <div id="feedback" class="feedback"></div>
     </section>
     
     <section class="info-section">
         <h2>Cotação Atual do Dólar</h2>
-        <p id="current-rate">R$ {{currency.value_dollar}}</p> <!-- Valor dinâmico -->
-        <p>Última atualização: <span id="last-updated">{{minutes}} minutos</span></p>
+        <p id="current-rate">R$ {% if currency %}{{currency.value_dollar}}{% endif %}</p> <!-- Valor dinâmico -->
+        <p>Última atualização: <span id="last-updated">{% if minutes %}{{minutes}} minutos{% endif %}</span></p>
     </section>
     
     <section class="tips-section">

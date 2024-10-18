@@ -6,6 +6,7 @@
 @import url(footer.css);
 @import url(dashboard.css);
 @import url(register.css);
+@import url(errors.css);
 
 * {
   margin: 0;

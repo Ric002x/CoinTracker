@@ -48,5 +48,5 @@ COPY . .
 EXPOSE 80
 
 # Run the application.
-CMD gunicorn -w 1 -b 0.0.0.0:80 app.base.run:app
+CMD gunicorn -w 1 -b 0.0.0.0:80 wsgi:app
 

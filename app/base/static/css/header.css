@@ -33,20 +33,23 @@
     background-color: #cccccc12;
 }
 
-.login-button {
+.register-login-buttons span {
     background-color: var(--color-secondary);
     padding: 5px 10px;
-    border-radius: 10px;
-    border: none;
     font-size: 16px;
     cursor: pointer;
     font-weight: 600;
     color: var(--color-text);
     letter-spacing: 0.5px;
     transition: all 0.2s ease-in-out;
+    display: inline-block;
+    margin: 0;
 }
 
-.login-button i {margin-right: 8px;}
+.register-login-buttons span:first-child {
+    border-radius: 2rem;
+}
+
 
 
 @keyframes appear {

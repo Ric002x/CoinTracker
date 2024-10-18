@@ -10,12 +10,12 @@
 
             <div class="form-group">
                 {{ form.email.label }}
-                {{ form.email }}
+            <input id="email" name="email" required type="email" value="{% if form.email.data %}{{form.email.data}}{% endif %}" placeholder="exemplo@email.com">
             </div>
 
             <div class="form-group">
                 {{ form.password.label }}
-                {{ form.password }}
+                <input id="password" name="password" required="" type="password" value="" placeholder="••••••••">
             </div>
             
             {{form.submit()}}
