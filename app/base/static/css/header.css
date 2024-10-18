@@ -33,7 +33,16 @@
     background-color: #cccccc12;
 }
 
-.register-login-buttons span {
+
+/* Register and Login Button */
+.register-login-buttons {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+}
+
+.register-login-buttons span  {
     background-color: var(--color-secondary);
     padding: 5px 10px;
     font-size: 16px;
@@ -44,12 +53,52 @@
     transition: all 0.2s ease-in-out;
     display: inline-block;
     margin: 0;
+    position: relative;
+    overflow: hidden;
 }
 
 .register-login-buttons span:first-child {
-    border-radius: 2rem;
+    border-radius: 1rem 0 0 1rem;
 }
 
+.register-login-buttons span:last-child {
+    border-radius: 0 1rem 1rem 0;
+}
+
+.register-login-buttons span:nth-child(2) {
+    width: 2px;
+    height: 30px;
+    padding: 0;
+    background-color: #fff;
+}
+
+.register-login-buttons span:first-child a {
+    position: absolute;
+    right: -45px;
+    transition: all 0.2s ease-in-out;
+}
+
+.register-login-buttons span:last-child a {
+    position: absolute;
+    right: -70px;
+    transition: all 0.2s ease-in-out;
+}
+
+.register-login-buttons span:hover a {
+    right: 5px;
+}
+
+.register-login-buttons span i {
+    transition: all 0.2s ease-in-out;
+}
+
+.register-login-buttons span:first-child:hover i {
+    margin-right: 45px;
+}
+
+.register-login-buttons span:last-child:hover i {
+    margin-right: 70px;
+}
 
 
 @keyframes appear {

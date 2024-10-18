@@ -6,7 +6,7 @@ import google.auth.transport.requests
 import requests
 from flask import Blueprint, abort, flash, redirect
 from flask import render_template as flask_render_template
-from flask import request, session
+from flask import request, session, url_for
 from google.oauth2 import id_token
 from google_auth_oauthlib.flow import Flow
 from pip._vendor import cachecontrol
@@ -119,7 +119,7 @@ def callback():
         audience=GOOGLE_CLIENT_ID
     )
 
-    user = session_db.query(User).filter_by(google_id=id_info['sub']).first()
+    user = session_db.query(User).filter_by(email=id_info['email']).first()
 
     if not user:
         user = User(
@@ -139,7 +139,7 @@ def callback():
     session['user'] = user.id
 
     flash("Login feito com sucesso", "success")
-    return redirect('/')
+    return redirect(url_for('main.home'))
 
 
 @auth_pb.route('/logout')
