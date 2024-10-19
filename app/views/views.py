@@ -2,9 +2,9 @@ import datetime
 
 from flask import Blueprint, flash, redirect, request, session, url_for
 
-from .auth import get_user, render, render_restricted, user_alredy_logged
-from .forms import LoginForm, RegisterForm, TargetForm
-from .models import CurrencyValues, TargetValue, User, session_db
+from ..auth import get_user, render, render_restricted, user_alredy_logged
+from ..forms import LoginForm, RegisterForm, TargetForm
+from ..models import CurrencyValues, TargetValue, User, session_db
 
 main = Blueprint('main', __name__)
 

@@ -1,5 +1,5 @@
-from app.base import create_app, db
-from app.base.utils import start_schedule
+from app import create_app, db
+from app.utils import start_schedule
 
 app = create_app()
 

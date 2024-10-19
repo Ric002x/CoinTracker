@@ -3,7 +3,7 @@ from datetime import datetime
 import pytz
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from app.base import db
+from .extension import db, jwt
 
 session_db = db.session
 
@@ -38,6 +38,17 @@ class User(db.Model):
             'google_id': self.google_id,
             'email': self.email
         }
+
+
+@jwt.user_identity_loader
+def user_identity_lookup(user):
+    return user
+
+
+@jwt.user_lookup_loader
+def user_lookup_callback(_jwt_header, jwt_data):
+    identity = jwt_data['sub']
+    return User.query.filter_by(id=identity).one_or_none()
 
 
 class OAuth(db.Model):
