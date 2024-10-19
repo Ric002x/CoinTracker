@@ -87,3 +87,10 @@ class TargetValue(db.Model):
 
     def __str__(self):
         return f'{self.value}'
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "value": self.value,
+            "user": self.user_id
+        }

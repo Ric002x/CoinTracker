@@ -8,7 +8,7 @@ from wtforms.validators import DataRequired, NumberRange, ValidationError
 from .models import User, session_db
 
 
-class AlertFormPOST(FlaskForm):
+class TargetForm(FlaskForm):
     value = FloatField('Valor em Reais (R$):', validators=[
         DataRequired(message="Submeta um valor para salva-lo"),
         NumberRange(min=0, message="O valor deve ser positivo")])

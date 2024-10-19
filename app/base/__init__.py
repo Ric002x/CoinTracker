@@ -1,4 +1,5 @@
 from flask import Flask, render_template
+from flask_jwt_extended import JWTManager
 from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
@@ -10,16 +11,28 @@ def create_app():
     from dotenv import load_dotenv
     from flask_restful import Api
 
-    from app.api.auth import auth_pb_api
-    from app.api.views import Alerts
+    from app.api.views import UserTargetAPI, api_bp
 
     from .auth import auth_pb
+    from .models import User
     from .views import main
 
     app = Flask(__name__)
     api = Api(app)
+    jwt = JWTManager(app)
 
     load_dotenv()
+
+    app.config["JWT_SECRET_KEY"] = os.environ.get("FLASK_SECRET_KEY")
+
+    @jwt.user_identity_loader
+    def user_identity_lookup(user):
+        return user.id
+
+    @jwt.user_lookup_loader
+    def user_lookup_callback(_jwt_header, jwt_data):
+        identity = jwt_data['sub']
+        return User.query.filter_by(id=identity).one_or_none()
 
     DATABASE_USER = os.environ.get("DATABASE_USER")
     DATABASE_PASSWORD = os.environ.get("DATABASE_PASSWORD")
@@ -47,8 +60,8 @@ def create_app():
 
     app.register_blueprint(main)
     app.register_blueprint(auth_pb)
-    app.register_blueprint(auth_pb_api)
-    api.add_resource(Alerts, "/api/alert/")
+    app.register_blueprint(api_bp)
+    api.add_resource(UserTargetAPI, "/api/target/")
 
     # error templates
 
