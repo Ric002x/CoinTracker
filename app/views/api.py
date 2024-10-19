@@ -3,32 +3,10 @@ from flask_jwt_extended import (create_access_token, create_refresh_token,
                                 current_user, get_jwt_identity, jwt_required)
 from flask_restful import Resource
 
-from ..forms import LoginFormAPI, RegisterAPIForm, TargetAPIForm
+from ..forms import LoginFormAPI, TargetAPIForm, UserFormAPI
 from ..models import TargetValue, User, session_db
 
 api_bp = Blueprint('api', __name__)
-
-
-@api_bp.route('/api/register', methods=["POST"])
-def api_user_register():
-    data = request.json
-    form = RegisterAPIForm(data)
-
-    if form.validate():
-        form_data = form.data
-        if form_data:
-            new_user = User(
-                username=form_data['username'],
-                email=form_data['email'],
-                password=None,
-                google_id=None
-            )
-            new_user.set_password(form_data['password'])
-            session_db.add(new_user)
-            session_db.commit()
-            return jsonify(new_user.to_dict()), 201
-
-    return jsonify(form.form_errors), 400
 
 
 @api_bp.route('/api/create_token', methods=["POST"])
@@ -46,10 +24,11 @@ def api_create_token():
 
             access_token = create_access_token(user)
             refresh_token = create_refresh_token(user)
-            return jsonify({
-                'access_token': access_token,
-                'refresh_token': refresh_token
-            }), 200
+            tokens = {
+                'refresh_token': refresh_token,
+                'access_token': access_token
+            }
+            return jsonify(tokens)
     return jsonify(form.form_errors), 400
 
 
@@ -61,15 +40,59 @@ def api_refresh_token():
     return jsonify(access_token=access_token), 200
 
 
-@api_bp.route("/api/user", methods=["GET"])
-@jwt_required()
-def protected():
-    # We can now access our sqlalchemy User object via `current_user`.
-    return jsonify({
-        'id': current_user.id,
-        'username': current_user.username,
-        'email': current_user.email
-    }), 200
+class UserAPI(Resource):
+    @jwt_required()
+    def get(self):
+        user = {
+            'id': current_user.id,
+            'username': current_user.username,
+            'email': current_user.email
+        }
+        return jsonify(user), 200
+        ...  # See user logged
+
+    def post(self):
+        data = request.json
+        form = UserFormAPI(data)
+
+        if form.post_validate():
+            form_data = form.data
+            if form_data:
+                new_user = User(
+                    username=form_data['username'],
+                    email=form_data['email'],
+                    password=None,
+                    google_id=None
+                )
+                new_user.set_password(form_data['password'])
+                session_db.add(new_user)
+                session_db.commit()
+                return jsonify(new_user.to_dict()), 201
+
+        return jsonify(form.form_errors), 400
+
+    @jwt_required()
+    def patch(self):
+        data = request.json
+        form = UserFormAPI(data)
+
+        if form.patch_validate():
+            form_data = form.data
+            user = User.query.filter_by(
+                email=current_user.email).one_or_none()
+            if user and form_data:
+                if 'username' in form_data:
+                    user.username = form_data['username']
+                if 'email' in form_data:
+                    user.email = form_data['email']
+                session_db.commit()
+                return jsonify(user.to_dict()), 200
+
+        return jsonify(form.form_errors), 400
+
+
+api_bp.add_url_rule(
+    '/api/user/', view_func=UserAPI.as_view('user_api'))
 
 
 class UserTargetAPI(Resource):

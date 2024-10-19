@@ -8,7 +8,7 @@ def create_app():
 
     from .auth import auth_pb
     from .views.api import api_bp
-    from .views.views import main
+    from .views.base import main
 
     app = Flask(__name__)
     app.config.from_object(Config)

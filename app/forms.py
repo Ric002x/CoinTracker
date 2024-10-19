@@ -1,6 +1,7 @@
 import re
 from collections import defaultdict
 
+from flask_jwt_extended import current_user
 from flask_wtf import FlaskForm
 from wtforms import (EmailField, FloatField, PasswordField, StringField,
                      SubmitField)
@@ -79,14 +80,14 @@ class RegisterForm(FlaskForm):
                 "Já existe um usuário cadastrado com esse email")
 
 
-class RegisterAPIForm:
+class UserFormAPI:
     def __init__(self, data):
         self.data = data
         self.form_errors = defaultdict(list)
 
-    def validate(self):
+    def post_validate(self):
         if not isinstance(self.data, dict):
-            self.form_errors["msg": "A dict object must be used"]
+            self.form_errors["msg"].append("A dict object must be used")
             return False
         fields = {
             'email': self.data.get('email'),
@@ -116,7 +117,22 @@ class RegisterAPIForm:
 
         return True
 
-    def validate_email(self):
+    def patch_validate(self):
+        if not isinstance(self.data, dict):
+            self.form_errors["msg"].append("A dict object must be used")
+            return False
+
+        if self.data.get('username'):
+            self.validate_username()
+        if self.data.get('email'):
+            self.validate_email(method='patch')
+
+        if self.form_errors:
+            return False
+
+        return True
+
+    def validate_email(self, method="post"):
         email_regex = r"^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?\
         ^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0\
         -9-]*[a-z0-9])?$"
@@ -129,10 +145,19 @@ class RegisterAPIForm:
         existing_user = User.query.filter_by(
             email=self.data.get('email')).one_or_none()
 
-        if existing_user and existing_user.email == self.data.get('email'):
-            self.form_errors['email'].append(
-                "A user with that email already exist"
-            )
+        if method == 'post':
+            if existing_user and existing_user.email == self.data.get('email'):
+                self.form_errors['email'].append(
+                    "A user with that email already exist"
+                )
+        elif method == 'patch':
+            if existing_user:
+                user_is_owner = existing_user.email == current_user.email
+
+                if not user_is_owner:
+                    self.form_errors['email'].append(
+                        "A user with that email already exist"
+                    )
 
     def validate_username(self):
         username_regex = r"^[A-Z][A-Za-z0-9-_]{4,}$"
