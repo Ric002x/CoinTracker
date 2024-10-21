@@ -19,10 +19,16 @@ class TargetForm(FlaskForm):
 
 class TargetAPIForm:
     def __init__(self, data):
-        self.data = data
+        self.data: dict = data
         self.form_errors = defaultdict(list)
+        self.fields = ["value"]
 
     def validate(self):
+        for key, value in self.data.items():
+            if key not in self.fields:
+                self.form_errors['field_not_exist'].append(
+                    f"The {key} field does not match any field in form"
+                )
         if not self.data.get('value'):
             self.form_errors['value'].append(
                 "This field is required")
@@ -33,7 +39,7 @@ class TargetAPIForm:
                 "A numeric value is required")
             return False
 
-        if self.data.get('value') < 0:
+        if self.data.get('value') < 0:  # type: ignore
             self.form_errors['value'].append(
                 "The value has to be positive")
             return False
@@ -84,13 +90,17 @@ class RegisterForm(FlaskForm):
 
 class UserFormAPI:
     def __init__(self, data):
-        self.data = data
+        self.data: dict = data
         self.form_errors = defaultdict(list)
+        self.fields = ['username', 'email', 'password', 'repeat_password']
 
     def post_validate(self):
-        if not isinstance(self.data, dict):
-            self.form_errors["msg"].append("A dict object must be used")
-            return False
+        for key, value in self.data.items():
+            if key not in self.fields:
+                self.form_errors['field_not_exist'].append(
+                    f"The {key} field does not match any field in form"
+                )
+
         fields = {
             'email': self.data.get('email'),
             'username': self.data.get('username'),
@@ -120,10 +130,11 @@ class UserFormAPI:
         return True
 
     def patch_validate(self):
-        if not isinstance(self.data, dict):
-            self.form_errors["msg"].append("A dict object must be used")
-            return False
-
+        for key, value in self.data.items():
+            if key not in self.fields[0:2]:
+                self.form_errors['field_not_exist'].append(
+                    f"The {key} field does not match any field in form"
+                )
         if self.data.get('username'):
             self.validate_username()
         if self.data.get('email'):
@@ -139,7 +150,7 @@ class UserFormAPI:
         ^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0\
         -9-]*[a-z0-9])?$"
         if self.data.get('email') and not re.match(
-                email_regex, self.data.get('email')):
+                email_regex, self.data.get('email')):  # type: ignore
             self.form_errors['email'].append(
                 "Invalid email format"
             )
@@ -174,7 +185,7 @@ class UserFormAPI:
     def validate_password(self):
         password_regex = r"^(?=.*[a-z])(?=.*[A-Z])(?=.*[1-9]).{8,}$"
         if self.data.get('password') and not re.match(
-                password_regex, self.data.get('password')):
+                password_regex, self.data.get('password')):  # type: ignore
             self.form_errors['password'].append(
                 "The password must contain at least one uppercase letter, "
                 "one lowercase letter, and one number."
@@ -194,13 +205,16 @@ class LoginForm(FlaskForm):
 
 class LoginFormAPI:
     def __init__(self, data):
-        self.data = data
+        self.data: dict = data
         self.form_errors = defaultdict(list)
+        self.fields = ["email", "password"]
 
     def validate(self):
-        if not isinstance(self.data, dict):
-            self.form_errors["msg"].append("A dict object must be used")
-            return False
+        for key, value in self.data.items():
+            if key not in self.fields:
+                self.form_errors['field_not_exist'].append(
+                    f"The {key} field does not match any field in form"
+                )
         fields = {
             'email': self.data.get('email'),
             'password': self.data.get('password')
@@ -214,3 +228,58 @@ class LoginFormAPI:
             return False
 
         return True
+
+
+class ChangePasswordFormAPI:
+    def __init__(self, data):
+        self.data: dict = data
+        self.form_errors = defaultdict(list)
+        self.fields = ["old_password", "new_password", "repeat_password"]
+
+    def validate(self):
+        for key, value in self.data.items():
+            if key not in self.fields:
+                self.form_errors['field_not_exist'].append(
+                    f"The {key} field does not match any field in form"
+                )
+
+        fields = {
+            'old_password': self.data.get('old_password'),
+            'new_password': self.data.get('new_password'),
+            'repeat_password': self.data.get('repeat_password'),
+        }
+        for key, value in fields.items():
+            if not key or not value:
+                self.form_errors[key].append(
+                    "This field is required"
+                )
+
+        if self.form_errors:
+            return False
+
+        user = session_db.query(User).filter_by(id=current_user.id).first()
+        if not user or not user.check_password(self.data.get('old_password')):
+            self.form_errors['old_password'].append(
+                "the password is wrong"
+            )
+
+        if self.data.get('new_password') != self.data.get('repeat_password'):
+            self.form_errors['new_password'].append(
+                "The passwords need to match"
+            )
+
+        self.validate_password()
+
+        if self.form_errors:
+            return False
+
+        return True
+
+    def validate_password(self):
+        password_regex = r"^(?=.*[a-z])(?=.*[A-Z])(?=.*[1-9]).{8,}$"
+        if self.data.get('new_password') and not re.match(
+                password_regex, self.data.get('new_password')):  # type: ignore
+            self.form_errors['new_password'].append(
+                "The password must contain at least one uppercase letter, "
+                "one lowercase letter, and one number."
+            )

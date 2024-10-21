@@ -3,7 +3,8 @@ from flask_jwt_extended import (create_access_token, create_refresh_token,
                                 current_user, get_jwt_identity, jwt_required)
 from flask_restful import Resource
 
-from ..forms import LoginFormAPI, TargetAPIForm, UserFormAPI
+from ..forms import (ChangePasswordFormAPI, LoginFormAPI, TargetAPIForm,
+                     UserFormAPI)
 from ..models import TargetValue, User, session_db
 
 api_bp = Blueprint('api', __name__)
@@ -90,8 +91,35 @@ class UserAPI(Resource):
         return jsonify(form.form_errors), 400
 
 
+@api_bp.route('/api/user/change-password', methods=["patch"])
+@jwt_required()
+def change_password():
+    data = request.json
+    form = ChangePasswordFormAPI(data)
+
+    if not form.validate():
+        return jsonify(form.form_errors), 400
+
+    form_data = form.data
+    user = session_db.query(User).filter_by(id=current_user.id).first()
+    if not user:
+        return jsonify({
+            "msg": "user not found"
+        }), 400
+    user.set_password(form_data['new_password'])
+    session_db.commit()
+    return jsonify({
+        "msg": "Password updated successfully"
+    }), 200
+
+
 api_bp.add_url_rule(
     '/api/user/', view_func=UserAPI.as_view('user_api'))
+api_bp.add_url_rule(
+    '/api/user/password',
+    view_func=UserAPI.as_view('user_password_api'),
+    methods=["PATCH"]
+)
 
 
 class UserTargetAPI(Resource):

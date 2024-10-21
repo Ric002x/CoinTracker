@@ -39,9 +39,7 @@ class User(db.Model):
         return {
             'id': self.id,
             'username': self.username,
-            'google_id': self.google_id,
             'email': self.email,
-            'has_perm': self.has_permitions
         }
 
 
