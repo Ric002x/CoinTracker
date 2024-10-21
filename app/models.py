@@ -1,9 +1,11 @@
 from datetime import datetime
 
 import pytz
+from flask import redirect, request, session, url_for
+from flask_admin.contrib.sqla import ModelView
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from .extension import db, jwt
+from .extension import adm, db, jwt
 
 session_db = db.session
 
@@ -15,7 +17,8 @@ class User(db.Model):
     google_id = db.Column('google_id', db.String)
     username = db.Column('username', db.String)
     email = db.Column('email', db.String, unique=True)
-    password = db.Column('senha', db.String)
+    password = db.Column('password', db.String)
+    has_permitions = db.Column('has_perm', db.Boolean, default=False)
 
     def __init__(self, google_id, username, email, password):
         self.google_id = google_id
@@ -34,9 +37,11 @@ class User(db.Model):
 
     def to_dict(self):
         return {
+            'id': self.id,
             'username': self.username,
             'google_id': self.google_id,
-            'email': self.email
+            'email': self.email,
+            'has_perm': self.has_permitions
         }
 
 
@@ -105,3 +110,23 @@ class TargetValue(db.Model):
             "value": self.value,
             "user": self.user_id
         }
+
+
+# Admin:
+
+class CurrencyTrackModelView(ModelView):
+    def is_accessible(self):
+        user_is_logged = True if "user" in session else False
+        if not user_is_logged:
+            return False
+        user = session_db.query(User).filter_by(id=session['user']).first()
+        if user and user.has_permitions is True:
+            return True
+        return False
+
+    def inaccessible_callback(self, name, **kwargs):
+        return redirect(url_for('main.login_view', next=request.url))
+
+
+adm.add_view(CurrencyTrackModelView(User, session_db))
+adm.add_view(CurrencyTrackModelView(CurrencyValues, session_db))

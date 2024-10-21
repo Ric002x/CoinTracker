@@ -43,12 +43,12 @@ def api_refresh_token():
 class UserAPI(Resource):
     @jwt_required()
     def get(self):
-        user = {
-            'id': current_user.id,
-            'username': current_user.username,
-            'email': current_user.email
-        }
-        return jsonify(user), 200
+        user = User.query.filter_by(id=current_user.id).one_or_none()
+        if user:
+            return jsonify(user.to_dict()), 200
+        return jsonify({
+            "msg": "Not a logged user"
+        }), 400
 
     def post(self):
         data = request.json
