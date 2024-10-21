@@ -5,7 +5,7 @@ class Config:
     JWT_SECRET_KEY = os.environ.get("FLASK_SECRET_KEY")
     USE_POSTGRESQL = os.environ.get("USE_POSTGRESQL", "0") == "1"
     SECRET_KEY = os.environ.get("FLASK_SECRET_KEY", "supersekrit")
-    OAUTHLIB_INSECURE_TRANSPORT = "1"
+    os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = "1"
 
     if USE_POSTGRESQL:
         SQLALCHEMY_DATABASE_URI = \

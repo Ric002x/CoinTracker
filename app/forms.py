@@ -18,25 +18,27 @@ class TargetForm(FlaskForm):
 
 
 class TargetAPIForm:
-    def __init__(self, value):
-        self.value = value
+    def __init__(self, data):
+        self.data = data
         self.form_errors = defaultdict(list)
 
     def validate(self):
-        if not self.value:
+        if not self.data.get('value'):
             self.form_errors['value'].append(
                 "This field is required")
             return False
 
-        if not isinstance(self.value, (float, int)):
+        if not isinstance(self.data.get('value'), (float, int)):
             self.form_errors['value'].append(
                 "A numeric value is required")
             return False
 
-        if self.value < 0:
+        if self.data.get('value') < 0:
             self.form_errors['value'].append(
                 "The value has to be positive")
             return False
+
+        return True
 
 
 class RegisterForm(FlaskForm):

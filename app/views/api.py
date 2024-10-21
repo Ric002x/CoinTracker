@@ -22,8 +22,8 @@ def api_create_token():
             if not user or not user.check_password(form_data['password']):
                 return jsonify("Wrong user or password"), 401
 
-            access_token = create_access_token(user)
-            refresh_token = create_refresh_token(user)
+            access_token = create_access_token(user.id)
+            refresh_token = create_refresh_token(user.id)
             tokens = {
                 'refresh_token': refresh_token,
                 'access_token': access_token
@@ -49,7 +49,6 @@ class UserAPI(Resource):
             'email': current_user.email
         }
         return jsonify(user), 200
-        ...  # See user logged
 
     def post(self):
         data = request.json
@@ -101,38 +100,62 @@ class UserTargetAPI(Resource):
         target = TargetValue.query.filter_by(
             user_id=current_user.id).one_or_none()
         if not target:
-            return jsonify({"error": "No target created by user"})
-        return jsonify({"Target": target.value})
+            return jsonify({"error": "No target created by user"}), 400
+        return jsonify({"Target": target.value}), 200
 
     @jwt_required()
     def post(self):
+        data = request.json
+        form = TargetAPIForm(data)
+
+        if form.validate():
+            form_data = form.data
+            if form_data:
+                try:
+                    new_target = TargetValue(
+                        value=form_data['value'],
+                        user_id=current_user.id
+                    )
+                    session_db.add(new_target)
+                    session_db.commit()
+                except Exception:
+                    return jsonify({
+                        "msg": "failed to create. this user already has a "
+                        "created target"
+                    }), 400
+                return jsonify(new_target.to_dict()), 201
+        else:
+            return jsonify(form.form_errors), 400
+
+    @jwt_required()
+    def patch(self):
+        data = request.json
+        form = TargetAPIForm(data)
         existing_target = TargetValue.query.filter_by(
             user_id=current_user.id).one_or_none()
-        if existing_target:
-            return jsonify({"error": "this user already has a created target"})
 
-        value = request.json.get('value') if request.json else None
-        form = TargetAPIForm(value=value)
+        if not existing_target:
+            return jsonify({
+                "msg": "no target to update. plase, create one first"
+            }), 400
+
         if form.validate():
-            new_target = TargetValue(
-                value=value,
-                user_id=current_user.id
-            )
-            session_db.add(new_target)
-            session_db.commit()
-            return jsonify(new_target.to_dict())
-        else:
-            return jsonify(form.form_errors)
+            form_data = form.data
+            if form_data:
+                existing_target.value = form_data['value']
+                session_db.commit()
+                return jsonify(existing_target.to_dict()), 200
+        return jsonify(form.form_errors), 400
 
     @jwt_required()
     def delete(self):
         target = TargetValue.query.filter_by(
             user_id=current_user.id).one_or_none()
         if not target:
-            return jsonify({"message": "No target found"})
+            return jsonify({"message": "No target found"}), 400
         session_db.delete(target)
         session_db.commit()
-        return jsonify({"message": "Target deleted successful"})
+        return jsonify({"message": "Target deleted successful"}), 200
 
 
 api_bp.add_url_rule(

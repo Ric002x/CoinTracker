@@ -90,7 +90,7 @@ class TargetValue(db.Model):
     id = db.Column('id', db.Integer, primary_key=True, autoincrement=True)
     value = db.Column('value', db.Float)
     user_id = db.Column('user_id', db.ForeignKey(
-        'user.id', ondelete="CASCADE"))
+        'user.id', ondelete="CASCADE"), unique=True)
 
     def __init__(self, value, user_id):
         self.value = value

@@ -7,6 +7,7 @@ from .extension import api, db, jwt
 def create_app():
 
     from .auth import auth_pb
+    from .oauth.api import oauth_api_pb
     from .views.api import api_bp
     from .views.base import main
 
@@ -23,6 +24,7 @@ def create_app():
     app.register_blueprint(main)
     app.register_blueprint(auth_pb)
     app.register_blueprint(api_bp)
+    app.register_blueprint(oauth_api_pb)
 
     # error templates
 
