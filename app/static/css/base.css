@@ -7,6 +7,8 @@
 @import url(dashboard.css);
 @import url(register.css);
 @import url(errors.css);
+@import url(update_user.css);
+@import url(change_password.css);
 
 * {
   margin: 0;

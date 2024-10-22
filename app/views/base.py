@@ -3,7 +3,8 @@ import datetime
 from flask import Blueprint, flash, redirect, request, session, url_for
 
 from ..auth import get_user, render, render_restricted, user_alredy_logged
-from ..forms import LoginForm, RegisterForm, TargetForm
+from ..forms.base import (ChangePasswordForm, LoginForm, RegisterForm,
+                          TargetForm, UpdateUserForm)
 from ..models import CurrencyValues, TargetValue, User, session_db
 
 main = Blueprint('main', __name__)
@@ -76,7 +77,7 @@ def login_view():
     return render('pages/login.html', **context)
 
 
-@main.route('/dashboard', methods=["GET", "POST"])
+@main.route('/user/dashboard', methods=["GET", "POST"])
 def user_dashboard():
     """
     This view function handles both GET and POSTrequests for the user
@@ -160,3 +161,52 @@ def user_dashboard():
 
     return render_restricted(
         'pages/dashboard.html', **context)
+
+
+@main.route('/user/update', methods=["GET", "POST"])
+def user_update():
+    user = session_db.query(User).filter_by(id=session['user']).first()
+    if not user:
+        flash("erro na sessão")
+        return redirect('/login')
+
+    form = UpdateUserForm(
+        username=user.username,
+        email=user.email
+    )
+
+    context = {
+        "form": form
+    }
+
+    if request.method == "POST":
+        if form.validate_on_submit():
+            form_data = form.data
+            user.username = form_data['username']
+            user.email = form_data['email']
+            session_db.commit()
+            flash("Dados salvos com sucesso!", "success")
+            return redirect('/user/update')
+        else:
+            flash("Erro no formulário", "error")
+
+    return render_restricted("pages/user_update.html", **context)
+
+
+@main.route('/user/change-password', methods=["GET", "POST"])
+def change_password():
+    form = ChangePasswordForm()
+    context = {"form": form}
+
+    if request.method == "POST":
+        if form.validate_on_submit():
+            form_data = form.data
+            user = session_db.query(User).filter_by(id=session['user']).first()
+            user.set_password(form_data['new_password']) if user else None
+            session_db.commit()
+            flash("Senha atualizada com sucesso!", "success")
+            return redirect('/user/update')
+        else:
+            flash("Erro no formulário", "error")
+
+    return render_restricted("pages/change_password.html", **context)

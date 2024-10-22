@@ -54,19 +54,6 @@ def user_lookup_callback(_jwt_header, jwt_data):
     return User.query.filter_by(id=identity).one_or_none()
 
 
-class OAuth(db.Model):
-    __tablename__ = 'user_tokens'
-
-    id = db.Column('id', db.Integer, primary_key=True, autoincrement=True)
-    refresh_token = db.Column('refresh_token', db.String)
-    user_id = db.Column('user_id', db.ForeignKey(
-        'user.id', ondelete="CASCADE"))
-
-    def __init__(self, refresh_token, user_id):
-        self.refresh_token = refresh_token
-        self.user_id = user_id
-
-
 class CurrencyValues(db.Model):
     __tablename__ = 'currency_values'
 

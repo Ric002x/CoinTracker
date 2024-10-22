@@ -37,13 +37,15 @@
     color: #fff;
 }
 
-.dft-form input[type="submit"] {
+.dft-form input[type="submit"],
+.dft-form button[type="submit"] {
     margin-top: 1.5rem;
     padding: 10px 15px;
     border: none;
     border-radius: 5px;
     background-color: var(--color-secondary);
     font-weight: 600;
+    font-size: 16px;
     cursor: pointer;
     color: var(--color-text);
 }

@@ -1,0 +1,30 @@
+.user_update {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 545px;
+}
+
+.user_update section {
+    background-color: #333;
+    padding: 2rem;
+    width: 400px;
+}
+
+.user_update section h1 {
+    margin-bottom: 2.5rem;
+    text-align: center;
+}
+
+.user_update form {
+    display: flex;
+    flex-direction: column;
+}
+
+.user_update section a {
+    display: inline-block;
+    width: 100%;
+    text-align: center;
+    margin-top: 20px;
+    color: var(--color-secondary);
+}
