@@ -8,7 +8,7 @@ from .config import Config
 from .extension import adm, api, db, jwt
 
 
-def create_app():
+def create_app(test=False):
 
     from .auth import auth_pb
     from .models import User, session_db
@@ -17,9 +17,11 @@ def create_app():
     from .views.base import main
 
     app = Flask(__name__)
+
     app.config.from_object(Config)
 
-    db.init_app(app)
+    if test is False:
+        db.init_app(app)
     api.init_app(app)
     jwt.init_app(app)
     adm.init_app(app)

@@ -1,8 +1,10 @@
 import datetime
+from functools import wraps
 
-from flask import Blueprint, flash, redirect, request, session, url_for
+from flask import Blueprint, flash, redirect
+from flask import render_template as flask_render_template
+from flask import request, session, url_for
 
-from ..auth import get_user, render, render_restricted, user_alredy_logged
 from ..forms.base import (ChangePasswordForm, LoginForm, RegisterForm,
                           TargetForm, UpdateUserForm)
 from ..models import CurrencyValues, TargetValue, User, session_db
@@ -13,6 +15,38 @@ main = Blueprint('main', __name__)
 def parse_time(time_str):
     hours, minutes, seconds = map(float, time_str.split(':'))
     return minutes
+
+
+def render(template, *args, **kwargs):
+    if 'user' in session:
+        logged_user = session_db.query(User).filter_by(
+            id=session['user']).first()
+        context = {'user': logged_user.to_dict() if logged_user else None}
+        return flask_render_template(
+            template, *args, **kwargs, **context)
+
+    return flask_render_template(template, *args, **kwargs)
+
+
+def login_is_required(function):
+    @wraps(function)
+    def wrapper(*args, **kwargs):
+        if 'user' not in session:
+            flash("Usuário não logado. Faça login para continar", "error")
+            return redirect('/login')
+        user = User.query.filter_by(id=session['user']).one_or_none()
+        return function(user=user, *args, **kwargs)
+    return wrapper
+
+
+def user_alredy_logged(function):
+    @wraps(function)
+    def wrapper(*args, **kwargs):
+        if 'user' in session:
+            flash("Usuário já logado!", "error")
+            return redirect('/')
+        return function(*args, **kwargs)
+    return wrapper
 
 
 @main.route('/')
@@ -38,7 +72,7 @@ def register_view():
             session_db.add(user)
             session_db.commit()
             flash("Usuário cadastrado! Faça login para continuar.", "success")
-            return redirect(url_for('main.login_view'))
+            return redirect(url_for('/login'))
 
     context = {
         'form': form
@@ -56,20 +90,21 @@ def login_view():
             data = form.data
             user = session_db.query(User).filter_by(
                 email=data['email']).first()
-            if user:
-                try:
-                    check = user.check_password(
-                        data['password']) if user else None
-                    if check is False:
-                        flash("E-mail ou senha inválidos", "error")
-                    else:
-                        session['user'] = user.id
-                        session['name'] = user.username
-                        flash("Login realizado com sucesso", "success")
-                        return redirect(url_for('main.user_dashboard'))
+            if not user:
+                flash("E-mail ou senha inválidos", "error")
+                return redirect('/login')
 
-                except Exception:
-                    flash("E-mail ou senha inválidos", "error")
+            check_password = user.check_password(
+                data['password'])
+
+            if not check_password:
+                flash("E-mail ou senha inválidos", "error")
+                return redirect('/login')
+
+            session['user'] = user.id
+            session['name'] = user.username
+            flash("Login realizado com sucesso", "success")
+            return redirect(url_for('/user/dashboard'))
 
     context = {
         'form': form
@@ -78,7 +113,8 @@ def login_view():
 
 
 @main.route('/user/dashboard', methods=["GET", "POST"])
-def user_dashboard():
+@login_is_required
+def user_dashboard(user):
     """
     This view function handles both GET and POSTrequests for the user
     dashboard.
@@ -112,12 +148,10 @@ def user_dashboard():
     }
 
     try:
-        user = get_user()
-        if user:
-            target = session_db.query(TargetValue).filter_by(
-                user_id=user.id).first()
-            if target:
-                context['user_target'] = target.value if target else None
+        target = session_db.query(TargetValue).filter_by(
+            user_id=user.id).first()
+        if target:
+            context['user_target'] = target.value if target else None
     except Exception:
         ...
 
@@ -133,12 +167,12 @@ def user_dashboard():
                 session_db.add(target)
                 session_db.commit()
                 flash("Valor enviado", "success")
-                return redirect(url_for('main.user_dashboard'))
+                return redirect(url_for('/user/dashboard'))
 
             target.value = value
             session_db.commit()
             flash("valor atualizado com sucesso", "success")
-            return redirect(url_for('main.user_dashboard'))
+            return redirect(url_for('/user/dashboard'))
         else:
             flash("Valor inválido!", "error")
 
@@ -159,17 +193,13 @@ def user_dashboard():
     except Exception:
         ...
 
-    return render_restricted(
+    return render(
         'pages/dashboard.html', **context)
 
 
 @main.route('/user/update', methods=["GET", "POST"])
-def user_update():
-    user = session_db.query(User).filter_by(id=session['user']).first()
-    if not user:
-        flash("erro na sessão")
-        return redirect('/login')
-
+@login_is_required
+def user_update(user):
     form = UpdateUserForm(
         username=user.username,
         email=user.email
@@ -190,10 +220,11 @@ def user_update():
         else:
             flash("Erro no formulário", "error")
 
-    return render_restricted("pages/user_update.html", **context)
+    return render("pages/user_update.html", **context)
 
 
 @main.route('/user/change-password', methods=["GET", "POST"])
+@login_is_required
 def change_password():
     form = ChangePasswordForm()
     context = {"form": form}
@@ -209,4 +240,4 @@ def change_password():
         else:
             flash("Erro no formulário", "error")
 
-    return render_restricted("pages/change_password.html", **context)
+    return render("pages/change_password.html", **context)

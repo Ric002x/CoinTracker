@@ -87,7 +87,8 @@ class UpdateUserForm(FlaskForm):
         current_user = session_db.query(
             User).filter_by(id=session['user']).first()
 
-        is_owner = existing_user.email == current_user.email
+        if existing_user and current_user:
+            is_owner = existing_user.email == current_user.email
 
         if existing_user:
             if not is_owner:
