@@ -45,11 +45,17 @@ class RegisterForm(FlaskForm):
                 'incluindo letras maiúsculas e números')
 
     def validate_username(self, field):
-        if len(field.data) < 4:
+        if len(field.data) < 5:
             raise ValidationError(
                 "O nome de usuário precisa ter pelo menos 5 caracteres")
 
     def validate_email(self, field):
+        email_regex = r"^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?\
+        ^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0\
+        -9-]*[a-z0-9])?$"
+        if field.data and not re.match(email_regex, field.data):
+            raise ValidationError("Formato de email inválido")
+
         existing_user = session_db.query(
             User).filter_by(email=field.data).first()
         if existing_user:
@@ -77,11 +83,17 @@ class UpdateUserForm(FlaskForm):
     ])
 
     def validate_username(self, field):
-        if len(field.data) < 4:
+        if len(field.data) < 5:
             raise ValidationError(
                 "O nome de usuário precisa ter pelo menos 5 caracteres")
 
     def validate_email(self, field):
+        email_regex = r"^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?\
+        ^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0\
+        -9-]*[a-z0-9])?$"
+        if field.data and not re.match(email_regex, field.data):
+            raise ValidationError("Formato de email inválido")
+
         existing_user = session_db.query(
             User).filter_by(email=field.data).first()
         current_user = session_db.query(

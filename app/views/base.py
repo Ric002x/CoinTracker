@@ -33,7 +33,7 @@ def login_is_required(function):
     def wrapper(*args, **kwargs):
         if 'user' not in session:
             flash("Usuário não logado. Faça login para continar", "error")
-            return redirect('/login')
+            return redirect(url_for('main.login_view'))
         user = User.query.filter_by(id=session['user']).one_or_none()
         return function(user=user, *args, **kwargs)
     return wrapper
@@ -60,7 +60,9 @@ def register_view():
     form = RegisterForm()
 
     if request.method == "POST":
+        print("Um post está ocorrendo")
         if form.validate_on_submit():
+            print("post validado")
             data = form.data
             user = User(
                 username=data['username'],
@@ -72,7 +74,9 @@ def register_view():
             session_db.add(user)
             session_db.commit()
             flash("Usuário cadastrado! Faça login para continuar.", "success")
-            return redirect(url_for('/login'))
+            return redirect(url_for('main.login_view'))
+        else:
+            print("post inválido")
 
     context = {
         'form': form
@@ -92,19 +96,19 @@ def login_view():
                 email=data['email']).first()
             if not user:
                 flash("E-mail ou senha inválidos", "error")
-                return redirect('/login')
+                return redirect(url_for('main.login_view'))
 
             check_password = user.check_password(
                 data['password'])
 
             if not check_password:
                 flash("E-mail ou senha inválidos", "error")
-                return redirect('/login')
+                return redirect(url_for('main.login_view'))
 
             session['user'] = user.id
             session['name'] = user.username
             flash("Login realizado com sucesso", "success")
-            return redirect(url_for('/user/dashboard'))
+            return redirect(url_for('main.user_dashboard'))
 
     context = {
         'form': form
@@ -167,12 +171,12 @@ def user_dashboard(user):
                 session_db.add(target)
                 session_db.commit()
                 flash("Valor enviado", "success")
-                return redirect(url_for('/user/dashboard'))
+                return redirect(url_for('main.user_dashboard'))
 
             target.value = value
             session_db.commit()
             flash("valor atualizado com sucesso", "success")
-            return redirect(url_for('/user/dashboard'))
+            return redirect(url_for('main.user_dashboard'))
         else:
             flash("Valor inválido!", "error")
 
@@ -225,14 +229,13 @@ def user_update(user):
 
 @main.route('/user/change-password', methods=["GET", "POST"])
 @login_is_required
-def change_password():
+def change_password(user):
     form = ChangePasswordForm()
     context = {"form": form}
 
     if request.method == "POST":
         if form.validate_on_submit():
             form_data = form.data
-            user = session_db.query(User).filter_by(id=session['user']).first()
             user.set_password(form_data['new_password']) if user else None
             session_db.commit()
             flash("Senha atualizada com sucesso!", "success")
