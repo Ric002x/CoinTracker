@@ -75,6 +75,14 @@ def test_login_post_failed(client):
     assert "E-mail ou senha inválidos" in response.text
 
 
+def test_login_form_fields_are_required(client):
+    user_data = {"email": "test@email.com", "password": "Password1"}
+    for key, value in user_data.items():
+        user_data[key] = ""
+        response = client.post('/login', data=user_data)
+        assert "Campo obrigatório" in response.text
+
+
 def test_login_successful(client):
     user = create_user()
 
@@ -102,6 +110,16 @@ def test_register_post_failed_and_form_errors(client):
     assert "As senha não coincidem" in response.text
     assert "O nome de usuário precisa ter pelo menos " \
         "5 caracteres" in response.text
+
+
+def test_register_password_validation_regex(client):
+    user_data = generate_user_data(
+        password="invalidpassword", repeat_password="invalidpassword"
+    )
+    response = client.post(
+        '/register', data=user_data, follow_redirects=True)
+    assert "A senha deve contar pelo menos 8 caracteres, incluindo " \
+        "letras maiúsculas e números" in response.text
 
 
 def test_register_user_email_is_unique(client):
@@ -173,6 +191,12 @@ def test_update_user_successful(client):
     assert "new_username" in response.text
     assert "new_email@email.com" in response.text
 
+    response2 = client.post('/user/update', data={
+        "username": "new_username2",
+    }, follow_redirects=True)
+    assert "new_username2" in response2.text
+    assert "new_email@email.com" in response2.text
+
 
 def test_change_password_page(client):
     login_user(client)
@@ -184,16 +208,24 @@ def test_change_password_page(client):
 def test_change_password_form_errors(client):
     login_user(client)
     password_data = generate_password_form(old_password="WrongPassword")
-    response = client.post('/user/change-password',
-                           data=password_data, follow_redirects=True)
-    assert "A senha inserida não coincide com a senha salva" in response.text
-    assert "Erro no formulário" in response.text
+    response1 = client.post('/user/change-password',
+                            data=password_data, follow_redirects=True)
+    assert "A senha inserida não coincide com a senha salva" in response1.text
+    assert "Erro no formulário" in response1.text
 
     password_data = generate_password_form(repeat_password="WrongPassword")
-    response = client.post('/user/change-password',
-                           data=password_data, follow_redirects=True)
-    assert "As senha não coincidem" in response.text
-    assert "Erro no formulário" in response.text
+    response2 = client.post('/user/change-password',
+                            data=password_data, follow_redirects=True)
+    assert "As senha não coincidem" in response2.text
+    assert "Erro no formulário" in response2.text
+
+    password_data = generate_password_form(
+        new_password="invalidpasswordregex",
+        repeat_password="invalidpasswordregex")
+    response3 = client.post('/user/change-password',
+                            data=password_data, follow_redirects=True)
+    assert "A senha deve contar pelo menos 8 caracteres, incluindo " \
+        "letras maiúsculas e números" in response3.text
 
 
 def test_change_password_succesfully(client):
@@ -228,3 +260,10 @@ def test_logout_succesful(client):
     response = client.get('/logout', follow_redirects=True)
     assert response.status_code == 200
     assert "Logout feito com sucesso" in response.text
+
+
+def test_user_already_logged_decorator(client):
+    login_user(client)
+
+    response = client.get('/login', follow_redirects=True)
+    assert "Usuário já logado!" in response.text

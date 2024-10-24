@@ -185,25 +185,23 @@ def user_dashboard(user):
         else:
             flash("Valor inválido!", "error")
 
-    try:
-        currency = session_db.query(CurrencyValues).order_by(
-            CurrencyValues.id.desc()
-        ).first()
-        if currency:
-            last_update = currency.date if currency else None
+    currency = session_db.query(CurrencyValues).order_by(
+        CurrencyValues.id.desc()
+    ).first()
 
-            actual_date = datetime.datetime.now()
-            if last_update is not None and actual_date is not None:
-                sub = actual_date - last_update
-                minutes = parse_time(f"{sub}") or None
-    except Exception:
-        ...
+    if currency:
+        last_update = currency.date if currency else None
+
+        actual_date = datetime.datetime.now()
+        if last_update is not None and actual_date is not None:
+            sub = actual_date - last_update
+            minutes = parse_time(f"{sub}") or None
 
     context = {
         "form": form,
-        "user_target": user_target or None,
+        "user_target": user_target.to_dict() if user_target else None,
         "del_action": url_for('main.delete_target') if user_target else None,
-        "currecy": currency.to_dict() if currency else None,
+        "currency": currency.to_dict() if currency else None,
         "minutes": str(minutes).replace('.0', '') if currency else None
     }
 
@@ -211,22 +209,21 @@ def user_dashboard(user):
         'pages/dashboard.html', **context)
 
 
-@main.route('/user/dashboard/target-delete', methods=["POST"])
+@main.route('/user/dashboard/target-delete', methods=["GET", "POST"])
 @login_is_required
 def delete_target(user):
     if not request.method == "POST":
         return redirect(url_for('main.user_dashboard'))
 
-    try:
-        target_to_delete = session_db.query(
-            TargetValue).filter_by(user_id=user.id).first()
-        if target_to_delete:
-            session_db.delete(target_to_delete)
-            session_db.commit()
+    target_to_delete = session_db.query(
+        TargetValue).filter_by(user_id=user.id).first()
+    if target_to_delete:
+        session_db.delete(target_to_delete)
+        session_db.commit()
         flash("Valor deletado", "success")
+    else:
+        flash("Nenhum valor para deletar", "error")
         return redirect(url_for('main.user_dashboard'))
-    except Exception:
-        print("Erro no delete")
     return redirect(url_for('main.user_dashboard'))
 
 

@@ -22,7 +22,7 @@ def create_app(test=False):
 
     if test is False:
         db.init_app(app)
-        csrf.init_app(app)
+    csrf.init_app(app)
     api.init_app(app)
     jwt.init_app(app)
     adm.init_app(app)
