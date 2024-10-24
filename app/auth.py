@@ -88,14 +88,3 @@ def callback():
 
     flash("Login feito com sucesso", "success")
     return redirect(url_for('main.home'))
-
-
-@auth_pb.route('/logout')
-def logout():
-    if 'user' in session:
-        session.clear()
-        flash("Logout feito com sucesso", "success")
-        return redirect('/')
-    else:
-        flash("Não há usuário logado", "error")
-        return redirect('/')

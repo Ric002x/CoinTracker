@@ -215,3 +215,16 @@ def test_change_password_succesfully(client):
         "password": "Password1"
     }, follow_redirects=True)
     assert "E-mail ou senha inválidos" in new_login.text
+
+
+def test_logout_redirect_if_not_user_in_session(client):
+    response = client.get('/logout')
+    assert response.status_code == 302
+    assert "/" in response.location
+
+
+def test_logout_succesful(client):
+    login_user(client)
+    response = client.get('/logout', follow_redirects=True)
+    assert response.status_code == 200
+    assert "Logout feito com sucesso" in response.text

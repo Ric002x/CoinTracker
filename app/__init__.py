@@ -5,7 +5,7 @@ from flask import Flask, render_template
 from flask.cli import with_appcontext
 
 from .config import Config
-from .extension import adm, api, db, jwt
+from .extension import adm, api, csrf, db, jwt
 
 
 def create_app(test=False):
@@ -22,6 +22,7 @@ def create_app(test=False):
 
     if test is False:
         db.init_app(app)
+        csrf.init_app(app)
     api.init_app(app)
     jwt.init_app(app)
     adm.init_app(app)

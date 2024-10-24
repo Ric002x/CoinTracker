@@ -45,11 +45,27 @@
     background-color: var(--color-secondary);
     font-weight: 600;
     cursor: pointer;
-    color: var(--color-text);
+    color: #000;
 }
 
 .form-section p {
     margin-top: 2rem;
+}
+
+.form-section p span {
+    text-decoration: underline;
+}
+
+.form-section button[type="submit"] {
+    background-color: #ff4c4c;
+    padding: 2px 5px;
+    border: none;
+    border-radius: 5px;
+    box-shadow: 1px 1px #101010;
+    font-weight: 550;
+    font-size: 16px;
+    margin-top: 10px;
+    cursor: pointer;
 }
 
 .info-section {

@@ -116,6 +116,17 @@ def login_view():
     return render('pages/login.html', **context)
 
 
+@main.route('/logout')
+def logout():
+    if 'user' in session:
+        session.clear()
+        flash("Logout feito com sucesso", "success")
+        return redirect(url_for('main.home'))
+    else:
+        flash("Não há usuário logado", "error")
+        return redirect(url_for('main.home'))
+
+
 @main.route('/user/dashboard', methods=["GET", "POST"])
 @login_is_required
 def user_dashboard(user):
@@ -147,15 +158,9 @@ def user_dashboard(user):
     """
     form = TargetForm()
 
-    context = {
-        'form': form
-    }
-
     try:
-        target = session_db.query(TargetValue).filter_by(
+        user_target = session_db.query(TargetValue).filter_by(
             user_id=user.id).first()
-        if target:
-            context['user_target'] = target.value if target else None
     except Exception:
         ...
 
@@ -163,17 +168,17 @@ def user_dashboard(user):
     if request.method == "POST":
         if form.validate_on_submit():
             value = form.value.data
-            if not target:
-                target = TargetValue(
+            if not user_target:
+                new_target = TargetValue(
                     value=value,
                     user_id=user.id if user else None
                 )
-                session_db.add(target)
+                session_db.add(new_target)
                 session_db.commit()
                 flash("Valor enviado", "success")
                 return redirect(url_for('main.user_dashboard'))
 
-            target.value = value
+            user_target.value = value
             session_db.commit()
             flash("valor atualizado com sucesso", "success")
             return redirect(url_for('main.user_dashboard'))
@@ -190,15 +195,39 @@ def user_dashboard(user):
             actual_date = datetime.datetime.now()
             if last_update is not None and actual_date is not None:
                 sub = actual_date - last_update
-                minutes = parse_time(f"{sub}")
-            context['currency'] = currency.to_dict() if currency else None
-            context['minutes'] = str(minutes).replace(
-                '.0', '') if minutes else None
+                minutes = parse_time(f"{sub}") or None
     except Exception:
         ...
 
+    context = {
+        "form": form,
+        "user_target": user_target or None,
+        "del_action": url_for('main.delete_target') if user_target else None,
+        "currecy": currency.to_dict() if currency else None,
+        "minutes": str(minutes).replace('.0', '') if currency else None
+    }
+
     return render(
         'pages/dashboard.html', **context)
+
+
+@main.route('/user/dashboard/target-delete', methods=["POST"])
+@login_is_required
+def delete_target(user):
+    if not request.method == "POST":
+        return redirect(url_for('main.user_dashboard'))
+
+    try:
+        target_to_delete = session_db.query(
+            TargetValue).filter_by(user_id=user.id).first()
+        if target_to_delete:
+            session_db.delete(target_to_delete)
+            session_db.commit()
+        flash("Valor deletado", "success")
+        return redirect(url_for('main.user_dashboard'))
+    except Exception:
+        print("Erro no delete")
+    return redirect(url_for('main.user_dashboard'))
 
 
 @main.route('/user/update', methods=["GET", "POST"])
