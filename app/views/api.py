@@ -48,7 +48,7 @@ class UserAPI(Resource):
         if user:
             return jsonify(user.to_dict()), 200
         return jsonify({
-            "msg": "Not a logged user"
+            "msg": "Authorization is required"
         }), 400
 
     def post(self):

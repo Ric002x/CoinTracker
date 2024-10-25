@@ -18,7 +18,7 @@
         <p>Adicione um valor, e receba notificação por email quando o dólar alcançar o valor desejado</p>
 
         {% if user_target %}
-            <p>Seu valor salvo atualmente é: <span>R$ {{user_target}}</span></p>
+            <p>Seu valor salvo atualmente é: <span>R$ {{user_target.value}}</span></p>
             <form action="{{del_action}}" method="POST">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <button type="submit">Deletar</button>
