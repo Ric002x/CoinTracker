@@ -124,7 +124,7 @@ class UserTargetAPI(Resource):
             user_id=current_user.id).one_or_none()
         if not target:
             return jsonify({"error": "No target created by user"}), 400
-        return jsonify({"Target": target.value}), 200
+        return jsonify(target.to_dict()), 200
 
     @jwt_required()
     def post(self):

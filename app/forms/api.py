@@ -202,7 +202,7 @@ class ChangePasswordFormAPI:
 
         if self.data.get('new_password') != self.data.get('repeat_password'):
             self.form_errors['new_password'].append(
-                "The passwords need to match"
+                "The new password need to match with the repeat_password"
             )
 
         self.validate_password()
