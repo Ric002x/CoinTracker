@@ -1,4 +1,4 @@
-from .test_api_user_and_authentication import create_user, generate_tokens
+from .test_api_user_and_authentication import generate_tokens
 
 
 def create_target(client, token):
@@ -129,7 +129,7 @@ def test_api_target_patch_update_successfully(client):
 
 def test_api_target_delete_jwt_required(client):
     response = client.delete('/api/target', follow_redirects=True)
-    assert response.status_code == 405
+    assert response.status_code == 401
 
 
 def test_api_target_delete_no_target_found(client):

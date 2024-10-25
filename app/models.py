@@ -73,6 +73,14 @@ class CurrencyValues(db.Model):
             'date': self.date
         }
 
+    @classmethod
+    def list_all(cls):
+        query_list = []
+        for item in cls.query.order_by(cls.id).all():
+            item_list = item.to_dict()
+            query_list.append(item_list)
+        return query_list
+
 
 class TargetValue(db.Model):
     __tablename__ = 'target_value'

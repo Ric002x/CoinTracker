@@ -5,7 +5,7 @@ from flask_restful import Resource
 
 from ..forms.api import (ChangePasswordFormAPI, LoginFormAPI, TargetAPIForm,
                          UserFormAPI)
-from ..models import TargetValue, User, session_db
+from ..models import CurrencyValues, TargetValue, User, session_db
 
 api_bp = Blueprint('api', __name__)
 
@@ -183,3 +183,21 @@ class UserTargetAPI(Resource):
 
 api_bp.add_url_rule(
     '/api/target/', view_func=UserTargetAPI.as_view('user_target_api'))
+
+
+@api_bp.route('/api/currency/list', methods=['GET'])
+def currency_get_list():
+    currency = CurrencyValues.list_all()
+    if not currency:
+        return jsonify({"msg": "A value was not found"}), 500
+    return jsonify(currency)
+
+
+@api_bp.route('/api/currency/latest', methods=["GET"])
+def currency_get_object():
+    currency = session_db.query(CurrencyValues).order_by(
+        CurrencyValues.id.desc()
+    ).first()
+    if not currency:
+        return jsonify({"msg": "A value was not found"}), 500
+    return jsonify(currency.to_dict())
