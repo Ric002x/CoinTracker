@@ -3,7 +3,7 @@
     align-items: center;
     justify-content: center;
     width: 100%;
-    height: 580px;
+    min-height: 650px;
 }
 
 @keyframes rotate {
@@ -22,7 +22,7 @@
 }
 
 .login-section {
-    width: 350px;
+    width: 400px;
     min-height: 300px;
     padding: 4rem 4rem;
     border-radius: 10px;
@@ -63,7 +63,7 @@
     text-align: center;
 }
 
-.login a {
+.login .google-login {
     color: white;
     text-align: center;
     display: block;
@@ -78,4 +78,18 @@
 
 .login i {
     margin-right: 5px;
+}
+
+.register-link a {
+    color: #00a6cb;
+}
+
+@media screen and (max-width:600px) {
+    .login-section {
+        width: 80%;
+    }
+
+    .login .google-login {
+        font-size: inherit;
+    }
 }

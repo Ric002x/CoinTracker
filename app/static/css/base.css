@@ -40,6 +40,8 @@ a {
   --color-accent: #9BAEBF;
 }
 
+.h-100 {height: 100%;}
+
 .roboto-regular-normal {
   font-family: "Roboto", sans-serif;
   font-weight: 400;
@@ -83,4 +85,14 @@ a {
 
 .message-flash:has(.warning) {
   background-image: linear-gradient(to right, #fffc3ccd, #fffc52cd);
+}
+
+@media screen and (max-width:700px) {
+    .roboto-bold-big {
+      font-size: 24px;
+    }
+
+    .montserrat-regular-normal {
+      font-size: 12px;
+    }
 }

@@ -16,20 +16,18 @@ def api_create_token():
     form = LoginFormAPI(data)
 
     if form.validate():
-        form_data = form.data
-        if form_data:
-            user = User.query.filter_by(email=form_data['email']).one_or_none()
+        user = User.query.filter_by(email=form.data['email']).one_or_none()
 
-            if not user or not user.check_password(form_data['password']):
-                return jsonify("Wrong user or password"), 401
+        if not user or not user.check_password(form.data['password']):
+            return jsonify("Wrong user or password"), 401
 
-            access_token = create_access_token(user.id)
-            refresh_token = create_refresh_token(user.id)
-            tokens = {
-                'refresh_token': refresh_token,
-                'access_token': access_token
-            }
-            return jsonify(tokens)
+        access_token = create_access_token(user.id)
+        refresh_token = create_refresh_token(user.id)
+        tokens = {
+            'refresh_token': refresh_token,
+            'access_token': access_token
+        }
+        return jsonify(tokens)
     return jsonify(form.form_errors), 400
 
 
@@ -44,30 +42,25 @@ def api_refresh_token():
 class UserAPI(Resource):
     @jwt_required()
     def get(self):
-        user = User.query.filter_by(id=current_user.id).one_or_none()
-        if user:
-            return jsonify(user.to_dict()), 200
-        return jsonify({
-            "msg": "Authorization is required"
-        }), 400
+        user = session_db.query(User).filter_by(
+            id=current_user.id).first() or None
+        return jsonify(user.to_dict()), 200  # type: ignore
 
     def post(self):
         data = request.json
         form = UserFormAPI(data)
 
         if form.post_validate():
-            form_data = form.data
-            if form_data:
-                new_user = User(
-                    username=form_data['username'],
-                    email=form_data['email'],
-                    password=None,
-                    google_id=None
-                )
-                new_user.set_password(form_data['password'])
-                session_db.add(new_user)
-                session_db.commit()
-                return jsonify(new_user.to_dict()), 201
+            new_user = User(
+                username=form.data['username'],
+                email=form.data['email'],
+                password=None,
+                google_id=None
+            )
+            new_user.set_password(form.data['password'])
+            session_db.add(new_user)
+            session_db.commit()
+            return jsonify(new_user.to_dict()), 201
 
         return jsonify(form.form_errors), 400
 
@@ -77,16 +70,14 @@ class UserAPI(Resource):
         form = UserFormAPI(data)
 
         if form.patch_validate():
-            form_data = form.data
             user = User.query.filter_by(
                 email=current_user.email).one_or_none()
-            if user and form_data:
-                if 'username' in form_data:
-                    user.username = form_data['username']
-                if 'email' in form_data:
-                    user.email = form_data['email']
-                session_db.commit()
-                return jsonify(user.to_dict()), 200
+            if 'username' in form.data:
+                user.username = form.data['username']  # type: ignore
+            if 'email' in form.data:
+                user.email = form.data['email']  # type: ignore
+            session_db.commit()
+            return jsonify(user.to_dict()), 200  # type: ignore
 
         return jsonify(form.form_errors), 400
 
@@ -104,13 +95,8 @@ def change_password():
     if not form.validate():
         return jsonify(form.form_errors), 400
 
-    form_data = form.data
     user = session_db.query(User).filter_by(id=current_user.id).first()
-    if not user:
-        return jsonify({
-            "msg": "user not found"
-        }), 400
-    user.set_password(form_data['new_password'])
+    user.set_password(form.data['new_password'])  # type: ignore
     session_db.commit()
     return jsonify({
         "msg": "Password updated successfully"
@@ -132,21 +118,19 @@ class UserTargetAPI(Resource):
         form = TargetAPIForm(data)
 
         if form.validate():
-            form_data = form.data
-            if form_data:
-                try:
-                    new_target = TargetValue(
-                        value=form_data['value'],
-                        user_id=current_user.id
-                    )
-                    session_db.add(new_target)
-                    session_db.commit()
-                except Exception:
-                    return jsonify({
-                        "msg": "failed to create. this user already has a "
-                        "created target"
-                    }), 400
-                return jsonify(new_target.to_dict()), 201
+            try:
+                new_target = TargetValue(
+                    value=form.data['value'],
+                    user_id=current_user.id
+                )
+                session_db.add(new_target)
+                session_db.commit()
+            except Exception:
+                return jsonify({
+                    "msg": "failed to create. this user already has a "
+                    "created target"
+                }), 400
+            return jsonify(new_target.to_dict()), 201
         else:
             return jsonify(form.form_errors), 400
 
@@ -163,11 +147,9 @@ class UserTargetAPI(Resource):
             }), 400
 
         if form.validate():
-            form_data = form.data
-            if form_data:
-                existing_target.value = form_data['value']
-                session_db.commit()
-                return jsonify(existing_target.to_dict()), 200
+            existing_target.value = form.data['value']
+            session_db.commit()
+            return jsonify(existing_target.to_dict()), 200
         return jsonify(form.form_errors), 400
 
     @jwt_required()

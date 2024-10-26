@@ -1,24 +1,22 @@
 <header class="main-header roboto-regular-normal">
-    <div class="main-logo h-100">
-        <a href="/">
-            <img class="h-100" src="{{ url_for('static', filename="assets/logo2.png") }}" alt="" />
-        </a>
+    <div class="header-container">
+        <div class="main-logo h-100">
+            <a href="/">
+                <img class="h-100" src="{{ url_for('static', filename="assets/logo2.png") }}" alt="" />
+            </a>
+        </div>
+        <nav class="nav-div h-100">
+            <div id="showNavItems" class="show-nav-items"><i class="fa-solid fa-bars"></i></div>
+            <ul id="navItems" class="nav-items">
+                <li><a href="#suporte">Suporte</a></li>
+                <li><a href="#sobre">Sobre</a></li>
+                {% if not user %}
+                    <li class="login-btn"><a href="/login"><i class="fa-solid fa-right-to-bracket"></i> Login</a></li>
+                {% else %}
+                    <li><a class="logged-user" href="/user/dashboard">{{ user.username }}</a></li>
+                    <li><a id="logoutButton" class="logout-button" href="/logout"><i class="fa-solid fa-right-from-bracket"></i> Logout</a></li>
+                {% endif %}
+            </ul>
+        </nav>
     </div>
-    <nav class="nav-div h-100">
-        <div id="showNavItens"><i class="fa-solid fa-bars"></i></div>
-        <ul id="navItens">
-            <li><a href="#suporte">Suporte</a></li>
-            <li><a href="#sobre">Sobre</a></li>
-            {% if not user %}
-                <li class="register-login-buttons">
-                    <span><i class="fa-solid fa-right-to-bracket"></i><a href="/login">Login</a></span>
-                    <span></span>
-                    <span><a href="/register">Cadastro</a><i class="fa-solid fa-user-plus"></i></span>
-                </li>
-            {% else %}
-                <li><a class="logged-user" href="/user/dashboard">{{ user.username }}</a></li>
-                <li><a class="logout-button" href="/logout"><i class="fa-solid fa-right-from-bracket"></i></a></li>
-            {% endif %}
-        </ul>
-    </nav>
 </header>

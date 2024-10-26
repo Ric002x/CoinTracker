@@ -1,198 +1,103 @@
 .main-header {
     width: 100%;
     height: 60px;
-    display: flex;
-    align-items: center;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
-    padding: 0 10rem;
     background-color: #333;
 }
 
-.h-100 {
+.header-container {
+    width: 90%;
     height: 100%;
+    display: flex;
+    margin: 0 auto;
 }
 
 .nav-div {
-    flex-grow: 1;
+    flex-grow: 3;
 }
 
-.nav-div ul {
-    height: 100%;
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    gap: 24px;
-}
-
-.nav-div ul li:not(:last-child) {
-    line-height: 8vh;
-    padding: 0 10px;
-}
-
-.nav-div ul li:not(:last-child):hover {
-    background-color: #cccccc12;
-}
-
-
-/* Register and Login Button */
-.register-login-buttons {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 10px;
-}
-
-.register-login-buttons span  {
-    background-color: var(--color-secondary);
-    padding: 5px 10px;
-    font-size: 16px;
-    cursor: pointer;
-    font-weight: 600;
-    color: var(--color-text);
-    letter-spacing: 0.5px;
-    transition: all 0.2s ease-in-out;
-    display: inline-block;
-    margin: 0;
-    position: relative;
-    overflow: hidden;
-}
-
-.register-login-buttons span:first-child {
-    border-radius: 1rem 0 0 1rem;
-}
-
-.register-login-buttons span:last-child {
-    border-radius: 0 1rem 1rem 0;
-}
-
-.register-login-buttons span:nth-child(2) {
-    width: 2px;
-    height: 30px;
-    padding: 0;
-    background-color: #fff;
-}
-
-.register-login-buttons span:first-child a {
-    position: absolute;
-    right: -45px;
-    transition: all 0.2s ease-in-out;
-}
-
-.register-login-buttons span:last-child a {
-    position: absolute;
-    right: -70px;
-    transition: all 0.2s ease-in-out;
-}
-
-.register-login-buttons span:hover a {
-    right: 5px;
-}
-
-.register-login-buttons span i {
-    transition: all 0.2s ease-in-out;
-}
-
-.register-login-buttons span:first-child:hover i {
-    margin-right: 45px;
-}
-
-.register-login-buttons span:last-child:hover i {
-    margin-right: 70px;
-}
-
-
-@keyframes appear {
-    from {
-        margin-left: 10px;
-    }
-    to {
-        margin-left: 0;
-    }
-}
-
-.logout-button {
-    background-color: #ff4c4c;
-    padding: 5px 10px;
-    border-radius: 10px;
-    font-weight: 600;
-    position: relative;
-    overflow: hidden;
-    display: inline-block;
-}
-
-.logout-button::after {
-    content: "Logout";
-    display: inline-block;
-    position: absolute;
-    transition: all 0.2s ease-in-out;
-    transform: translateX(55px);
-}
-
-.logout-button:hover::after {
-    transform: translateX(-48px);
-}
-
-.logout-button i {
-    transition: all 0.2s ease-in-out;
-}
-
-.logout-button:hover i {
-    margin-right: 55px;
-}
-
-#showNavItens {
+.show-nav-items {
     display: none;
 }
 
+.nav-items {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: end;
+    height: 100%;
+    gap: 30px;
+}
+
+.nav-items .login-btn a {
+    background-color: var(--color-secondary);
+    padding: 8px 12px;
+    border-radius: 20px;
+}
+
+.nav-items .logout-button {
+    background-color: #ff4c4c;
+    padding: 8px 12px;
+    border-radius: 20px;
+}
+
+.nav-items .login-btn i,
+.nav-items .logout-button i,
+.nav-items .register-btn i {
+    margin-right: 5px;
+}
+
+
 @keyframes showNav {
-    from{
+    from {
         transform: translateX(180px);
     }
     to {
-        transform: translateX(0);
+        transform: translateX(0px);
     }
 }
 
-@media screen and (max-width: 1000px) {
-    #navItens {
-        display: none;
-        position: absolute;
-        right: 0px;
-        background-color: var(--color-primary);
-        flex-direction: column-reverse;
-        height: fit-content;
-        justify-content: start;
-        align-items: center;
-        gap: 10px;
-        padding: 2rem 1rem;
-        border-radius: 0 0 0 25px;
-        width: 180px;
-        transition: all 0.2s ease-in-out;
-    }
 
-    #navItens li {
-        line-height: normal;
-        padding: 1.5rem;
-    }
-
-    #showNavItens {
+@media screen and (max-width:850px) {
+    .show-nav-items {
         display: block;
         position: absolute;
-        background-color: var(--color-primary);
-        right: 0px;
+        right: 50px;
         top: 10px;
-        padding: 0.8rem;
-        border-radius: 5px 0 0 5px;
         cursor: pointer;
+        font-size: 22px;
+        padding: 5px 8px;
         transition: all 0.2s ease-in-out;
     }
 
-    #showNavItens.active {
-        right: 180px;
+    .nav-items {
+        display: none;
+        width: 200px;
+        position: absolute;
+        top: 0;
+        right: 0;
+        flex-direction: column-reverse;
+        align-items: end;
+        justify-content: start;
+        height: fit-content;
+        gap: 20px;
+        background-color: #444;
+        padding: 20px;
+        border-radius: 0 0 0 15px;
     }
 
-    #navItens.active {
-        animation: showNav 0.2s ease-in-out;
+    .show-nav-items.active {
+        right: 200px;
+        border-radius: 5px 0 0 5px;
+        background-color: #444;
+    }
+
+    .nav-items.active {
         display: flex;
+        animation: showNav 0.2s ease-in-out;
+    }
+
+    .nav-items li a {
+        padding: 8px 12px;
     }
 }

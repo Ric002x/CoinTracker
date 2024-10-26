@@ -158,11 +158,8 @@ def user_dashboard(user):
     """
     form = TargetForm()
 
-    try:
-        user_target = session_db.query(TargetValue).filter_by(
-            user_id=user.id).first()
-    except Exception:
-        ...
+    user_target = session_db.query(TargetValue).filter_by(
+        user_id=user.id).first() or None
 
     # If user submit the form:
     if request.method == "POST":
@@ -190,12 +187,11 @@ def user_dashboard(user):
     ).first()
 
     if currency:
-        last_update = currency.date if currency else None
-
+        last_update = currency.date
         actual_date = datetime.datetime.now()
-        if last_update is not None and actual_date is not None:
-            sub = actual_date - last_update
-            minutes = parse_time(f"{sub}") or None
+
+        sub = actual_date - last_update
+        minutes = parse_time(f"{sub}")
 
     context = {
         "form": form,

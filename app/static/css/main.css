@@ -1,6 +1,9 @@
 .hero {
     padding: 5rem;
     padding-bottom: 0;
+    min-height: 80vh;
+    display: flex;
+    flex-direction: column;
 }
 
 .hero-text h1,
@@ -14,6 +17,7 @@
     justify-content: center;
     align-items: end;
     height: 398px;
+    flex-grow: 1;
 }
 
 .hero-figure div {
@@ -51,13 +55,21 @@
 }
 
 .figure1 {
-    height: 200px;
+    aspect-ratio: 1;
 }
 
 .figure2 {
-    height: 300px;
+    aspect-ratio: 0.6;
 }
 
 .figure3 {
-    height: 250px;
+    aspect-ratio: 0.8;
+}
+
+
+@media screen and (max-width:500px) {
+    .hero-figure {
+        height: fit-content;
+        flex-grow: 1;
+    }
 }

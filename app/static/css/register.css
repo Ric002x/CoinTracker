@@ -49,3 +49,9 @@
     cursor: pointer;
     color: var(--color-text);
 }
+
+@media screen and (max-width:600px) {
+    .register section {
+        width: 80%;
+    }
+}

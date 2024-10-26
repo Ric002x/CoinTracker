@@ -133,6 +133,29 @@ def test_api_patch_user_fields_are_optitional(client):
     assert b"test2@email.com" in response.data
 
 
+def test_api_patch_user_can_not_change_email_to_an_alredy_existent_one(client):
+    tokens = generate_tokens(client)
+    user2 = create_user(email='test2@email.com')
+
+    response = client.patch(
+        "/api/user", headers={
+            "Authorization": f"Bearer {tokens['access_token']}"
+        }, json={"email": user2.email}, follow_redirects=True)
+
+    assert response.status_code == 400
+    assert b"A user with that email already exist" in response.data
+
+
+def test_api_patch_user_form_error_field_can_not_be_empty(client):
+    tokens = generate_tokens(client)
+    response = client.patch(
+        "/api/user", headers={
+            "Authorization": f"Bearer {tokens['access_token']}"
+        }, json={"username": ""}, follow_redirects=True)
+    assert response.status_code == 400
+    assert b"The field can't be empty" in response.data
+
+
 def test_api_user_change_password_form_errors(client):
     tokens = generate_tokens(client)
     form_password = generate_password_form(old_password="wrongpassword")
@@ -156,6 +179,14 @@ def test_api_user_change_password_form_errors(client):
     }, json=form_password, follow_redirects=True)
     assert response.status_code == 400
     assert b"The password must contain at least one uppercase" in response.data
+
+    form_password = generate_password_form()
+    for key, value in form_password.items():
+        form_password[key] = ""
+        response = client.patch('/api/user/change-password', headers={
+            "Authorization": f"Bearer {tokens['access_token']}"
+        }, json=form_password, follow_redirects=True)
+        assert b"This field is required" in response.data
 
 
 def test_api_user_change_password_successfully(client):

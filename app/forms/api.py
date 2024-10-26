@@ -83,6 +83,11 @@ class UserFormAPI:
                 self.form_errors['field_not_exist'].append(
                     f"The {key} field does not match any field in form"
                 )
+            if self.data[key] == "":
+                self.form_errors['field_not_exist'].append(
+                    "The field can't be empty"
+                )
+
         if self.data.get('username'):
             self.validate_username()
         if self.data.get('email'):
